@@ -5,6 +5,7 @@
 ```shell
 forge install https://github.com/Uniswap/v3-core --no-commit
 forge install https://github.com/Uniswap/v3-periphery --no-commit
+forge install https://github.com/Brechtpd/base64--no-commit
 ```
 
 ## Install Specific OpenZeppelin Version for Uniswap V3 with NPM

@@ -5,7 +5,7 @@ import { UniswapV3Factory } from "@uniswap/v3-core/contracts/UniswapV3Factory.so
 import { SwapRouter } from "@uniswap/v3-periphery/contracts/SwapRouter.sol";
 
 // https://github.com/Uniswap/v3-periphery/issues/272
-// import { NFTDescriptor } from "@uniswap/v3-periphery/contracts/libraries/NFTDescriptor.sol";
+import { NFTDescriptor } from "@uniswap/v3-periphery/contracts/libraries/NFTDescriptor.sol";
 // https://github.com/Uniswap/v3-periphery/blob/main/contracts/libraries/NFTDescriptor.sol
 
 contract DeployUniswap {
