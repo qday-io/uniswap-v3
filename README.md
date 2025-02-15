@@ -34,3 +34,13 @@ npm i
 mkdir -p lib/openzeppelin-contracts
 cp -r node_modules/@openzeppelin/contracts lib/openzeppelin-contracts/
 ```
+
+## Scripts
+
+### Step 1
+
+Note: modify 
+
+lib/v3-periphery/contracts/libraries/NFTDescriptor.sol
+
+from library to contract to deploy.
