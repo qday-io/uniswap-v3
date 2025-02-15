@@ -16,7 +16,7 @@ contract DeployUniswap {
         positionManager = new NonfungiblePositionManager(
             factoryAddress,
             weth9Address,
-            address(0)
+            tokenDescriptorAddress
         );
     }
 }
