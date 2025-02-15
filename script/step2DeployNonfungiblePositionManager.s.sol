@@ -8,8 +8,9 @@ contract DeployUniswap {
     NonfungiblePositionManager public positionManager;
 
     function deploy() public {
-        address factoryAddress = address(0);
+
         address weth9Address = address(0);
+        address factoryAddress = address(0);
         address tokenDescriptorAddress = address(0);
 
         positionManager = new NonfungiblePositionManager(
