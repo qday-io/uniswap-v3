@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.7.6;
 
-import { UniswapV3Factory } from "@uniswap/v3-core/contracts/UniswapV3Factory.sol";
-// import { NonfungiblePositionManager } from "@uniswap/v3-periphery/contracts/NonfungiblePositionManager.sol";
+import { NonfungiblePositionManager } from "@uniswap/v3-periphery/contracts/NonfungiblePositionManager.sol";
 // import { SwapRouter } from "v3-periphery/contracts/SwapRouter.sol";
 // import { TickLens } from "@uniswap/v3-periphery/contracts/lenses/TickLens.sol";
 // import { TickLens } from "@uniswap/v3-periphery/contracts/lenses/TickLens.sol";
@@ -27,7 +26,7 @@ contract DeployUniswap {
         // Deploy Uniswap V3 core contracts
 
         factory = new UniswapV3Factory();
-        // positionManager = new NonfungiblePositionManager(address(factory));
+        positionManager = new NonfungiblePositionManager(address(factory));
         // swapRouter = new SwapRouter(address(factory));
         // tickLens = new TickLens(address(factory));
 
