@@ -1,5 +1,5 @@
-// // SPDX-License-Identifier: MIT
-// pragma solidity ^0.7.6;
+// SPDX-License-Identifier: MIT
+pragma solidity 0.7.6;
 
 // import { UniswapV3Factory } from "@uniswap/v3-core/contracts/UniswapV3Factory.sol";
 // // import { NonfungiblePositionManager } from "@uniswap/v3-periphery/contracts/NonfungiblePositionManager.sol";

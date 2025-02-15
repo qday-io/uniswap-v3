@@ -23,12 +23,11 @@ setup with
 ```shell
 npm i
 mkdir -p lib/openzeppelin-contracts
-cp -r node_modules/@openzeppelin/contracts/* lib/openzeppelin-contracts/
+cp -r node_modules/@openzeppelin/contracts lib/openzeppelin-contracts/
 ```
 
-<!-- :warning:  -->
 
-<!-- In:
+In:
 
 lib/v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol
 
@@ -60,4 +59,4 @@ update to be
 
 ```solidity
 import '@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol';
-``` -->
+``` 

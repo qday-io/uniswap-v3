@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.6;
+pragma solidity 0.7.6;
 
 import { NonfungiblePositionManager } from "@uniswap/v3-periphery/contracts/NonfungiblePositionManager.sol";
 
@@ -9,6 +9,6 @@ contract DeployUniswap {
 
     function deploy() public {
         address factoryAddress = address(0);
-        positionManager = new NonfungiblePositionManager(factoryAddress);
+        // positionManager = new NonfungiblePositionManager(factoryAddress);
     }
 }
