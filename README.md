@@ -6,6 +6,7 @@
 forge install https://github.com/Uniswap/v3-core --no-commit
 forge install https://github.com/Uniswap/v3-periphery --no-commit
 forge install https://github.com/OpenZeppelin/openzeppelin-contracts --no-commit
+forge install https://github.com/OpenZeppelin/openzeppelin-contracts --no-commit
 ```
 
 :warning: 

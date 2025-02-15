@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.7.6;
+pragma solidity ^0.7.6;
 
 import { UniswapV3Factory } from "@uniswap/v3-core/contracts/UniswapV3Factory.sol";
-import { NonfungiblePositionManager } from "@uniswap/v3-periphery/contracts/NonfungiblePositionManager.sol";
-
+// import { NonfungiblePositionManager } from "@uniswap/v3-periphery/contracts/NonfungiblePositionManager.sol";
 // import { SwapRouter } from "v3-periphery/contracts/SwapRouter.sol";
 // import { TickLens } from "@uniswap/v3-periphery/contracts/lenses/TickLens.sol";
 // import { TickLens } from "@uniswap/v3-periphery/contracts/lenses/TickLens.sol";
