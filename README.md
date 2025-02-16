@@ -72,7 +72,7 @@ forge create lib/v3-periphery/contracts/SwapRouter.sol:SwapRouter \
 --verify 
 ```
 
-### Step 3: Deploy NonfungibleTokenPositionDescriptor
+### Step 3: Deploy NFTDescriptor
 
 ```shell
 forge create lib/v3-periphery/contracts/libraries/NFTDescriptor.sol:NFTDescriptor  \
@@ -105,11 +105,6 @@ forge create lib/v3-periphery/contracts/NonfungibleTokenPositionDescriptor.sol:N
 ```
 
 ### Step 5: Deploy NonfungibleTokenPositionDescriptor
-
-:warning: using a null address for NonfungibleTokenPositionDescriptorFoundry for now :warning:
-
-import { NonfungiblePositionManager } from "@uniswap/v3-periphery/contracts/NonfungiblePositionManager.sol";
-
 
 ```shell
 forge create lib/v3-periphery/contracts/NonfungiblePositionManager.sol:NonfungiblePositionManager  \
