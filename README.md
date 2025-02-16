@@ -64,7 +64,6 @@ bytes32 public constant POOL_INIT_CODE_HASH = keccak256(abi.encodePacked(type(Un
 this will be used later updating: 
 ```
 -SwapRouter 
--NFTDescriptor
 -NonfungibleTokenPositionDescriptor
 -NonfungiblePositionManager
 ```
@@ -133,6 +132,22 @@ Use the --libraries flag in forge to link library NFTDescriptor to NonfungibleTo
 Example:
 
 https://github.com/foundry-rs/foundry/issues/4587#issuecomment-1522159970
+
+Inside file:
+
+lib/v3-periphery/contracts/libraries/PoolAddress.sol
+
+go to:
+
+https://github.com/uniswap/v3-periphery/blob/main/contracts/libraries/PoolAddress.sol#L6
+
+then modify POOL_INIT_CODE_HASH to be the value you read from UniswapV3Factory after it was deployed:
+
+```solidity
+bytes32 internal constant POOL_INIT_CODE_HASH =  <UniswapV3Factory_POOL_INIT_CODE_HASH>;
+```
+
+Note: adding liquidity will fail if POOL_INIT_CODE_HASH is not set correctly.
 
 Script:
 
