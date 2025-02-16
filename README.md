@@ -126,6 +126,22 @@ forge create lib/v3-periphery/contracts/NonfungibleTokenPositionDescriptor.sol:N
 
 ### Step 5: Deploy NonfungiblePositionManager
 
+Inside file:
+
+lib/v3-periphery/contracts/libraries/PoolAddress.sol
+
+go to:
+
+https://github.com/uniswap/v3-periphery/blob/main/contracts/libraries/PoolAddress.sol#L6
+
+then modify POOL_INIT_CODE_HASH to be the value you read from UniswapV3Factory after it was deployed:
+
+```solidity
+bytes32 internal constant POOL_INIT_CODE_HASH =  <UniswapV3Factory_POOL_INIT_CODE_HASH>;
+```
+
+Script:
+
 ```shell
 forge create lib/v3-periphery/contracts/NonfungiblePositionManager.sol:NonfungiblePositionManager  \
 --constructor-args-path src/deployConstructor/NonfungiblePositionManager.txt \
@@ -142,24 +158,23 @@ forge create lib/v3-periphery/contracts/NonfungiblePositionManager.sol:Nonfungib
 
 #### UniswapV3Factory
 
-https://sepolia.basescan.org/address/0x16d59bf09ef975ea84883eeb8d2a71dc4c739e2c#code
+https://sepolia.basescan.org/address/0x6e553ceedadefcd0fce6a220bc17814db8a193d0#code
 
 #### SwapRouter
 
-https://sepolia.basescan.org/address/0xabd01148fd3875ed2a16ed8da4f0658439812b8b#code
+https://sepolia.basescan.org/address/0x026f20fef14108ed16a4c2cd91a7eaf02359cb67#code
 
 #### NFTDescriptor
 
-https://sepolia.basescan.org/address/0x97eb22b53687eab2937b7f1189efcf2f933cfc46#code
+https://sepolia.basescan.org/address/0x523e9edc70fdabdc8b965e0894f27a689294415f#code
 
 #### NonfungibleTokenPositionDescriptor
 
-https://sepolia.basescan.org/address/0x923941fb54e1a22c26e392e87eac67213f405fef#code
+https://sepolia.basescan.org/address/0xeb9322b1e1268e8a4e35c2e37041740296908bfb#code
 
 #### NonfungiblePositionManager
 
-https://sepolia.basescan.org/address/0x25f94fd6b15504a556bef182a646ec2344dfacff#code
-
+https://sepolia.basescan.org/address/0x93c7430178ea1b082e151338930c6732f34ea69b#code
 
 <!-- Note 1: Modify 
 
