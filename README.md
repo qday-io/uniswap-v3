@@ -51,3 +51,10 @@ from library to contract to deploy. -->
 lib/v3-periphery/contracts/NonfungibleTokenPositionDescriptor.sol
  
 depends on the archived solidity-lib library which is already setup. -->
+
+```shell
+forge script deployUniswapV3 \
+--private-key $devTestnetPrivateKey \
+--rpc-url $baseSepoliaHTTPS \
+--broadcast
+```

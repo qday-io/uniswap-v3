@@ -11,11 +11,14 @@ import { SwapRouter } from "@uniswap/v3-periphery/contracts/SwapRouter.sol";
 
 import { NonfungibleTokenPositionDescriptor } from "@uniswap/v3-periphery/contracts/NonfungibleTokenPositionDescriptor.sol";
 
-// Set Solidity compiler optimizations to 1000 to get around the stack too deep error with NonfungiblePositionManager.
+// Set Solidity compiler optimizations to 200 or 1000 to get around the stack too deep error with NonfungiblePositionManager.
+// foundry.toml
+// optimizer = true
+// optimizer_runs = 200
 // https://github.com/Uniswap/v3-periphery/issues/273
 import { NonfungiblePositionManager } from "@uniswap/v3-periphery/contracts/NonfungiblePositionManager.sol";
 
-contract DeployUniswap {
+contract deployUniswapV3 {
 
     UniswapV3Factory public factory;
     SwapRouter public swapRouter;
@@ -25,6 +28,10 @@ contract DeployUniswap {
 
     NonfungibleTokenPositionDescriptor public nftPositionDescriptor;
     NonfungiblePositionManager public nftPositionManager;
+
+    function run() public {
+        deploy();
+    }
 
     function deploy() public {
 
