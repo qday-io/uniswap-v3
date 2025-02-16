@@ -116,6 +116,31 @@ forge create lib/v3-periphery/contracts/NonfungiblePositionManager.sol:Nonfungib
 --verify 
 ```
 
+## Deployments 
+
+### Base Sepolia
+
+#### UniswapV3Factory
+
+https://sepolia.basescan.org/address/0x16d59bf09ef975ea84883eeb8d2a71dc4c739e2c#code
+
+#### SwapRouter
+
+https://sepolia.basescan.org/address/0xabd01148fd3875ed2a16ed8da4f0658439812b8b#code
+
+#### NFTDescriptor
+
+https://sepolia.basescan.org/address/0x97eb22b53687eab2937b7f1189efcf2f933cfc46#code
+
+#### NonfungibleTokenPositionDescriptor
+
+https://sepolia.basescan.org/address/0x923941fb54e1a22c26e392e87eac67213f405fef#code
+
+#### NonfungiblePositionManager
+
+https://sepolia.basescan.org/address/0x25f94fd6b15504a556bef182a646ec2344dfacff#code
+
+
 <!-- Note 1: Modify 
 
 lib/v3-periphery/contracts/libraries/NFTDescriptor.sol
