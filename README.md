@@ -61,7 +61,14 @@ add the following line to the contract:
 bytes32 public constant POOL_INIT_CODE_HASH = keccak256(abi.encodePacked(type(UniswapV3Pool).creationCode));
 ```
 
-this will be used later updating NonfungiblePositionManager which uses library PoolAddress with CREATE2 to compute pool contract addresses:
+this will be used later updating: 
+```
+-SwapRouter 
+-NFTDescriptor
+-NonfungibleTokenPositionDescriptor
+-NonfungiblePositionManager
+```
+which uses library PoolAddress with CREATE2 to compute pool contract addresses:
 
 https://github.com/uniswap/v3-periphery/blob/main/contracts/libraries/PoolAddress.sol#L33-L47
 
@@ -81,6 +88,22 @@ forge create lib/v3-core/contracts/UniswapV3Factory.sol:UniswapV3Factory  \
 ```
 
 ### Step 2: Deploy SwapRouter 
+
+Inside file:
+
+lib/v3-periphery/contracts/libraries/PoolAddress.sol
+
+go to:
+
+https://github.com/uniswap/v3-periphery/blob/main/contracts/libraries/PoolAddress.sol#L6
+
+then modify POOL_INIT_CODE_HASH to be the value you read from UniswapV3Factory after it was deployed:
+
+```solidity
+bytes32 internal constant POOL_INIT_CODE_HASH =  <UniswapV3Factory_POOL_INIT_CODE_HASH>;
+```
+
+Note: swaps will fail if POOL_INIT_CODE_HASH is not set correctly.
 
 ```shell
 forge create lib/v3-periphery/contracts/SwapRouter.sol:SwapRouter \
@@ -139,6 +162,8 @@ then modify POOL_INIT_CODE_HASH to be the value you read from UniswapV3Factory a
 ```solidity
 bytes32 internal constant POOL_INIT_CODE_HASH =  <UniswapV3Factory_POOL_INIT_CODE_HASH>;
 ```
+
+Note: adding liquidity will fail if POOL_INIT_CODE_HASH is not set correctly.
 
 Script:
 
