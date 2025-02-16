@@ -55,7 +55,7 @@ depends on the archived solidity-lib library which is already setup. -->
 ```shell
 forge script script/deployUniswapV3.s.sol:deployUniswapV3 \
 --private-key $devTestnetPrivateKey \
---rpc-url https://sepolia.base.org \
+--rpc-url $baseSepoliaHTTPS \
 --etherscan-api-key $basescanApiKey \
 --verify \
 --broadcast
