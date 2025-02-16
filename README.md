@@ -52,7 +52,7 @@ forge script script/deployUniswapV3.s.sol:deployUniswapV3 \
 ### Step 1: Deploy UniswapV3Factory 
 
 ```shell
-forge create src/UniswapV3FactoryFoundry.sol:UniswapV3FactoryFoundry  \
+forge create lib/v3-core/contracts/UniswapV3Factory.sol:UniswapV3Factory  \
 --private-key $devTestnetPrivateKey \
 --rpc-url $baseSepoliaHTTPS \
 --etherscan-api-key $basescanApiKey \
