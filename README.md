@@ -13,6 +13,7 @@ https://github.com/MarcusWentz/uniswapV3_hardhat_deployment
 forge install https://github.com/Uniswap/v3-core --no-commit
 forge install https://github.com/Uniswap/v3-periphery --no-commit
 forge install https://github.com/Brechtpd/base64 --no-commit
+forge install https://github.com/Uniswap/solidity-lib --no-commit
 ```
 
 ## Install Specific OpenZeppelin Version for Uniswap V3 with NPM
@@ -39,8 +40,14 @@ cp -r node_modules/@openzeppelin/contracts lib/openzeppelin-contracts/
 
 ### Step 1
 
-Note: modify 
+<!-- Note 1: Modify 
 
 lib/v3-periphery/contracts/libraries/NFTDescriptor.sol
 
-from library to contract to deploy.
+from library to contract to deploy. -->
+
+<!-- Note 2: Contract
+
+lib/v3-periphery/contracts/NonfungibleTokenPositionDescriptor.sol
+ 
+depends on the archived solidity-lib library which is already setup. -->

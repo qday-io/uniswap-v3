@@ -2,3 +2,4 @@
 @uniswap/v3-periphery/=lib/v3-periphery/
 @openzeppelin/contracts=lib/openzeppelin-contracts/contracts
 base64-sol=lib/base64
+@uniswap/lib=lib/solidity-lib/
