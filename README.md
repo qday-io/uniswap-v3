@@ -63,7 +63,7 @@ forge create lib/v3-core/contracts/UniswapV3Factory.sol:UniswapV3Factory  \
 ### Step 2: Deploy SwapRouter 
 
 ```shell
-forge create src/SwapRouterFoundry.sol:SwapRouterFoundry  \
+forge create lib/v3-periphery/contracts/SwapRouter.sol:SwapRouter \
 --constructor-args-path src/deployConstructor/SwapRouter.txt \
 --private-key $devTestnetPrivateKey \
 --rpc-url $baseSepoliaHTTPS \
