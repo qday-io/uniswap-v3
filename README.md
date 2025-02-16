@@ -55,11 +55,15 @@ Inside file:
 
 lib/v3-core/contracts/UniswapV3Factory.sol:UniswapV3Factory
 
-add the following line which will be used later for !!! for CREATE2 pool address calculations:
+add the following line to the contract:
 
 ```solidity
 bytes32 public constant POOL_INIT_CODE_HASH = keccak256(abi.encodePacked(type(UniswapV3Pool).creationCode));
 ```
+
+this will be used later updating NonfungiblePositionManager which uses library PoolAddress with CREATE2 to compute pool contract addresses:
+
+https://github.com/uniswap/v3-periphery/blob/main/contracts/libraries/PoolAddress.sol#L33-L47
 
 reference: 
 
