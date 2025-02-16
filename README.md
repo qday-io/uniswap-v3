@@ -51,6 +51,22 @@ forge script script/deployUniswapV3.s.sol:deployUniswapV3 \
 
 ### Step 1: Deploy UniswapV3Factory 
 
+Inside file:
+
+lib/v3-core/contracts/UniswapV3Factory.sol:UniswapV3Factory
+
+add the following line which will be used later for !!! for CREATE2 pool address calculations:
+
+```solidity
+bytes32 public constant POOL_INIT_CODE_HASH = keccak256(abi.encodePacked(type(UniswapV3Pool).creationCode));
+```
+
+reference: 
+
+https://ethereum.stackexchange.com/a/156409
+
+Script:
+
 ```shell
 forge create lib/v3-core/contracts/UniswapV3Factory.sol:UniswapV3Factory  \
 --private-key $devTestnetPrivateKey \
@@ -104,7 +120,7 @@ forge create lib/v3-periphery/contracts/NonfungibleTokenPositionDescriptor.sol:N
 --verify 
 ```
 
-### Step 5: Deploy NonfungibleTokenPositionDescriptor
+### Step 5: Deploy NonfungiblePositionManager
 
 ```shell
 forge create lib/v3-periphery/contracts/NonfungiblePositionManager.sol:NonfungiblePositionManager  \
