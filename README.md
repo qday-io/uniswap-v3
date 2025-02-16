@@ -60,7 +60,19 @@ forge create src/UniswapV3FactoryFoundry.sol:UniswapV3FactoryFoundry  \
 --verify 
 ```
 
---constructor-args-path src/deployConstructor/UniswapV2Factory.txt \
+### Step 2: Deploy SwapRouter 
+
+```shell
+forge create src/SwapRouterFoundry.sol:SwapRouterFoundry  \
+--constructor-args-path src/deployConstructor/SwapRouter.txt \
+--private-key $devTestnetPrivateKey \
+--rpc-url $baseSepoliaHTTPS \
+--etherscan-api-key $basescanApiKey \
+--broadcast \
+--verify 
+```
+
+### Step 3: Deploy SwapRouter 
 
 
 <!-- Note 1: Modify 
