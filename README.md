@@ -38,7 +38,30 @@ cp -r node_modules/@openzeppelin/contracts lib/openzeppelin-contracts/
 
 ## Scripts
 
-### Step 1
+```shell
+forge script script/deployUniswapV3.s.sol:deployUniswapV3 \
+--private-key $devTestnetPrivateKey \
+--rpc-url $baseSepoliaHTTPS \
+--etherscan-api-key $basescanApiKey \
+--verify \
+--broadcast
+```
+
+## Deploy Uniswap V3 With Forge Commands Directly 
+
+### Step 1: Deploy UniswapV3Factory 
+
+```shell
+forge create src/UniswapV3FactoryFoundry.sol:UniswapV3FactoryFoundry  \
+--private-key $devTestnetPrivateKey \
+--rpc-url $baseSepoliaHTTPS \
+--etherscan-api-key $basescanApiKey \
+--broadcast \
+--verify 
+```
+
+--constructor-args-path src/deployConstructor/UniswapV2Factory.txt \
+
 
 <!-- Note 1: Modify 
 
@@ -52,11 +75,3 @@ lib/v3-periphery/contracts/NonfungibleTokenPositionDescriptor.sol
  
 depends on the archived solidity-lib library which is already setup. -->
 
-```shell
-forge script script/deployUniswapV3.s.sol:deployUniswapV3 \
---private-key $devTestnetPrivateKey \
---rpc-url $baseSepoliaHTTPS \
---etherscan-api-key $basescanApiKey \
---verify \
---broadcast
-```
