@@ -108,8 +108,11 @@ forge create lib/v3-periphery/contracts/NonfungibleTokenPositionDescriptor.sol:N
 
 :warning: using a null address for NonfungibleTokenPositionDescriptorFoundry for now :warning:
 
+import { NonfungiblePositionManager } from "@uniswap/v3-periphery/contracts/NonfungiblePositionManager.sol";
+
+
 ```shell
-forge create src/NonfungiblePositionManagerFoundry.sol:NonfungiblePositionManagerFoundry  \
+forge create lib/v3-periphery/contracts/NonfungiblePositionManager.sol:NonfungiblePositionManager  \
 --constructor-args-path src/deployConstructor/NonfungiblePositionManager.txt \
 --private-key $devTestnetPrivateKey \
 --rpc-url $baseSepoliaHTTPS \
