@@ -72,7 +72,17 @@ forge create src/SwapRouterFoundry.sol:SwapRouterFoundry  \
 --verify 
 ```
 
-### Step 3: Deploy SwapRouter 
+### Step 3: Deploy NonfungibleTokenPositionDescriptor
+
+```shell
+forge create src/NonfungibleTokenPositionDescriptorFoundry.sol:NonfungibleTokenPositionDescriptorFoundry  \
+--constructor-args-path src/deployConstructor/NonfungibleTokenPositionDescriptor.txt \
+--private-key $devTestnetPrivateKey \
+--rpc-url $baseSepoliaHTTPS \
+--etherscan-api-key $basescanApiKey \
+--broadcast \
+--verify 
+```
 
 
 <!-- Note 1: Modify 
