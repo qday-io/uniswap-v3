@@ -7,6 +7,8 @@ import { NonfungiblePositionManager } from "@uniswap/v3-periphery/contracts/Nonf
 
 contract NonfungiblePositionManagerFoundry is NonfungiblePositionManager {
 
+    // WETH in butes32 is:
+    // 0x5745544800000000000000000000000000000000000000000000000000000000
     constructor(address factory, address weth9Address, address nftPositionDescriptor) NonfungiblePositionManager(factory,weth9Address,nftPositionDescriptor) {}
 
 }

@@ -85,16 +85,23 @@ forge create lib/v3-periphery/contracts/libraries/NFTDescriptor.sol:NFTDescripto
 
 ### Step 4: Deploy NonfungibleTokenPositionDescriptor
 
-:warning: error with dynamic linking :warning:
+Use the --libraries flag in forge to link library NFTDescriptor to NonfungibleTokenPositionDescriptor
+
+Example:
+
+https://github.com/foundry-rs/foundry/issues/4587#issuecomment-1522159970
+
+Script:
 
 ```shell
-forge create src/NonfungibleTokenPositionDescriptorFoundry.sol:NonfungibleTokenPositionDescriptorFoundry  \
+forge create lib/v3-periphery/contracts/NonfungibleTokenPositionDescriptor.sol:NonfungibleTokenPositionDescriptor  \
 --constructor-args-path src/deployConstructor/NonfungibleTokenPositionDescriptor.txt \
 --private-key $devTestnetPrivateKey \
 --rpc-url $baseSepoliaHTTPS \
 --etherscan-api-key $basescanApiKey \
 --broadcast \
---verify \
+--libraries lib/v3-periphery/contracts/libraries/NFTDescriptor.sol:NFTDescriptor:<contract_address> \
+--verify 
 ```
 
 ### Step 5: Deploy NonfungibleTokenPositionDescriptor
