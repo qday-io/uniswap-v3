@@ -216,15 +216,4 @@ https://sepolia.basescan.org/address/0xc0135dfcf073d065fa07b499e32767e2ab3e2350#
 
 https://sepolia.basescan.org/address/0xc0135dfcf073d065fa07b499e32767e2ab3e2350#code
  
-<!-- Note 1: Modify 
-
-lib/v3-periphery/contracts/libraries/NFTDescriptor.sol
-
-from library to contract to deploy. -->
-
-<!-- Note 2: Contract
-
-lib/v3-periphery/contracts/NonfungibleTokenPositionDescriptor.sol
- 
-depends on the archived solidity-lib library which is already setup. -->
 
