@@ -36,17 +36,6 @@ mkdir -p lib/openzeppelin-contracts
 cp -r node_modules/@openzeppelin/contracts lib/openzeppelin-contracts/
 ```
 
-## Scripts
-
-```shell
-forge script script/deployUniswapV3.s.sol:deployUniswapV3 \
---private-key $devTestnetPrivateKey \
---rpc-url $baseSepoliaHTTPS \
---etherscan-api-key $basescanApiKey \
---verify \
---broadcast
-```
-
 ## Deploy Uniswap V3 With Forge Commands Directly 
 
 ### Step 1: Deploy UniswapV3Factory 
