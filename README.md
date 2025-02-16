@@ -53,8 +53,10 @@ lib/v3-periphery/contracts/NonfungibleTokenPositionDescriptor.sol
 depends on the archived solidity-lib library which is already setup. -->
 
 ```shell
-forge script deployUniswapV3 \
+forge script script/deployUniswapV3.s.sol:deployUniswapV3 \
 --private-key $devTestnetPrivateKey \
---rpc-url $baseSepoliaHTTPS \
+--rpc-url https://sepolia.base.org \
+--etherscan-api-key $basescanApiKey \
+--verify \
 --broadcast
 ```
