@@ -198,24 +198,24 @@ forge create lib/v3-periphery/contracts/NonfungiblePositionManager.sol:Nonfungib
 
 #### UniswapV3Factory
 
-https://sepolia.basescan.org/address/0x6e553ceedadefcd0fce6a220bc17814db8a193d0#code
+https://sepolia.basescan.org/address/0x25c1c9245098606091e74a6f07063e3ff50524e2#code
 
 #### SwapRouter
 
-https://sepolia.basescan.org/address/0x026f20fef14108ed16a4c2cd91a7eaf02359cb67#code
+https://sepolia.basescan.org/address/0xe0f5dfde6cc9770e2e45d91832cae8d4fee20526#code
 
 #### NFTDescriptor
 
-https://sepolia.basescan.org/address/0x523e9edc70fdabdc8b965e0894f27a689294415f#code
+https://sepolia.basescan.org/address/0x6b0c2530ec1c8c4a56e2cfc6c4c2ecf5af0ea267#code
 
 #### NonfungibleTokenPositionDescriptor
 
-https://sepolia.basescan.org/address/0xeb9322b1e1268e8a4e35c2e37041740296908bfb#code
+https://sepolia.basescan.org/address/0xc0135dfcf073d065fa07b499e32767e2ab3e2350#code
 
 #### NonfungiblePositionManager
 
-https://sepolia.basescan.org/address/0x93c7430178ea1b082e151338930c6732f34ea69b#code
-
+https://sepolia.basescan.org/address/0xc0135dfcf073d065fa07b499e32767e2ab3e2350#code
+ 
 <!-- Note 1: Modify 
 
 lib/v3-periphery/contracts/libraries/NFTDescriptor.sol
