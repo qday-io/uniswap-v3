@@ -74,6 +74,17 @@ forge create src/SwapRouterFoundry.sol:SwapRouterFoundry  \
 
 ### Step 3: Deploy NonfungibleTokenPositionDescriptor
 
+```shell
+forge create lib/v3-periphery/contracts/libraries/NFTDescriptor.sol:NFTDescriptor  \
+--private-key $devTestnetPrivateKey \
+--rpc-url $baseSepoliaHTTPS \
+--etherscan-api-key $basescanApiKey \
+--broadcast \
+--verify 
+```
+
+### Step 4: Deploy NonfungibleTokenPositionDescriptor
+
 :warning: error with dynamic linking :warning:
 
 ```shell
@@ -83,10 +94,10 @@ forge create src/NonfungibleTokenPositionDescriptorFoundry.sol:NonfungibleTokenP
 --rpc-url $baseSepoliaHTTPS \
 --etherscan-api-key $basescanApiKey \
 --broadcast \
---verify 
+--verify \
 ```
 
-### Step 4: Deploy NonfungibleTokenPositionDescriptor
+### Step 5: Deploy NonfungibleTokenPositionDescriptor
 
 :warning: using a null address for NonfungibleTokenPositionDescriptorFoundry for now :warning:
 
