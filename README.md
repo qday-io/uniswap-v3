@@ -1,207 +1,128 @@
-## Foundry
+# Uniswap V3 Foundry 部署项目
 
-Based on:
+这是一个使用 Foundry 部署 Uniswap V3 的完整项目。项目包含了所有必要的合约部署脚本和工具。
 
-https://www.youtube.com/watch?v=SeiaiiviEhM
+## 🚀 快速开始
 
-https://github.com/MarcusWentz/uniswapV3_hardhat_deployment
-
-
-### Install Uniswap V3 contracts directly
-
-```shell
-forge install https://github.com/Uniswap/v3-core --no-commit
-forge install https://github.com/Uniswap/v3-periphery --no-commit
-forge install https://github.com/Brechtpd/base64 --no-commit
-forge install https://github.com/Uniswap/solidity-lib --no-commit
+### 1. 克隆项目
+```bash
+git clone <your-repo-url>
+cd uniswapV3_foundry_deployment
 ```
 
-## Install Specific OpenZeppelin Version for Uniswap V3 with NPM
-
-Uniswap V3 depends on an oudated version of OpenZeppelin defined in package.json:
-
-https://github.com/Uniswap/v3-periphery/blob/main/package.json
-
-which is added to the package.json in this project with:
-
-```shell
-npm install @openzeppelin/contracts@3.4.2-solc-0.7
+### 2. 安装依赖
+```bash
+forge install
+forge build
 ```
 
-then moved into Foundry path lib with these commands:
-
-```shell
-npm i
-mkdir -p lib/openzeppelin-contracts
-cp -r node_modules/@openzeppelin/contracts lib/openzeppelin-contracts/
+### 3. 检查 WETH 配置 (推荐)
+```bash
+# 检查 WETH 合约是否已部署
+./check_weth.sh
 ```
 
-## Deploy Uniswap V3 With Forge Commands Directly 
+### 4. 本地测试部署
+```bash
+# 启动 Anvil 节点
+anvil
 
-### Step 1: Deploy UniswapV3Factory 
-
-Inside file:
-
-lib/v3-core/contracts/UniswapV3Factory.sol:UniswapV3Factory
-
-add the following line to the contract:
-
-```solidity
-bytes32 public constant POOL_INIT_CODE_HASH = keccak256(abi.encodePacked(type(UniswapV3Pool).creationCode));
+# 在另一个终端中运行部署
+./deploy_step_by_step.sh
 ```
 
-this will be used later updating: 
-```
--SwapRouter 
--NonfungibleTokenPositionDescriptor
--NonfungiblePositionManager
-```
-which uses library PoolAddress with CREATE2 to compute pool contract addresses:
+### 4. 生产部署
+```bash
+# 设置环境变量
+export PRIVATE_KEY=your_private_key_here
+export RPC_URL=https://sepolia.base.org
+export ETHERSCAN_API_KEY=your_etherscan_api_key_here
 
-https://github.com/uniswap/v3-periphery/blob/main/contracts/libraries/PoolAddress.sol#L33-L47
-
-reference: 
-
-https://ethereum.stackexchange.com/a/156409
-
-Script:
-
-```shell
-forge create lib/v3-core/contracts/UniswapV3Factory.sol:UniswapV3Factory  \
---private-key $devTestnetPrivateKey \
---rpc-url $baseSepoliaHTTPS \
---etherscan-api-key $basescanApiKey \
---broadcast \
---verify 
+# 运行生产部署
+./deploy-production.sh
 ```
 
-### Step 2: Deploy SwapRouter 
+## 📁 项目结构
 
-Inside file:
-
-lib/v3-periphery/contracts/libraries/PoolAddress.sol
-
-go to:
-
-https://github.com/uniswap/v3-periphery/blob/main/contracts/libraries/PoolAddress.sol#L6
-
-then modify POOL_INIT_CODE_HASH to be the value you read from UniswapV3Factory after it was deployed:
-
-```solidity
-bytes32 internal constant POOL_INIT_CODE_HASH =  <UniswapV3Factory_POOL_INIT_CODE_HASH>;
+```
+uniswapV3_foundry_deployment/
+├── script/
+│   └── deployUniswapV3.s.sol    # 主要部署脚本
+├── src/                          # 自定义合约
+├── lib/                          # 依赖库
+├── deploy.sh                     # 本地部署脚本
+├── deploy-production.sh          # 生产部署脚本
+├── DEPLOYMENT_GUIDE.md          # 详细部署指南
+└── foundry.toml                 # Foundry 配置
 ```
 
-Note: swaps will fail if POOL_INIT_CODE_HASH is not set correctly.
+## 🔧 部署的合约
 
-```shell
-forge create lib/v3-periphery/contracts/SwapRouter.sol:SwapRouter \
---constructor-args-path src/deployConstructor/SwapRouter.txt \
---private-key $devTestnetPrivateKey \
---rpc-url $baseSepoliaHTTPS \
---etherscan-api-key $basescanApiKey \
---broadcast \
---verify 
+1. **UniswapV3Factory** - 工厂合约，用于创建流动性池
+2. **SwapRouter** - 交换路由器，用于执行代币交换
+3. **NonfungibleTokenPositionDescriptor** - NFT 位置描述符
+4. **NonfungiblePositionManager** - NFT 位置管理器
+
+## 🌐 支持的网络
+
+### Base Sepolia 测试网
+- **WETH 地址**: `0x4200000000000000000000000000000000000006`
+- **RPC URL**: `https://sepolia.base.org`
+- **Chain ID**: 84532
+
+### 其他网络
+可以通过修改 `script/deployUniswapV3.s.sol` 中的 WETH 地址来支持其他网络。
+
+## 📋 部署脚本
+
+### WETH 检查 (`check_weth.sh`)
+- 验证 WETH 合约是否存在
+- 测试 WETH 基本功能
+- 检查部署者 WETH 余额
+
+### 本地测试 (`deploy_step_by_step.sh`)
+- 使用 Anvil 本地节点
+- 自动检查 WETH 配置
+- 逐步部署所有合约
+
+### WETH 部署 (`deploy_weth.sh`)
+- 部署 WETH 合约到本地网络
+- 自动更新配置文件
+- 生成部署摘要
+
+## 🔍 验证部署
+
+部署完成后，您可以使用以下命令验证合约：
+
+```bash
+# 检查工厂合约
+cast call <FACTORY_ADDRESS> "owner()" --rpc-url $RPC_URL
+
+# 检查路由器合约
+cast call <ROUTER_ADDRESS> "factory()" --rpc-url $RPC_URL
 ```
 
-### Step 3: Deploy NFTDescriptor
+## 🛠️ 环境要求
 
-```shell
-forge create lib/v3-periphery/contracts/libraries/NFTDescriptor.sol:NFTDescriptor  \
---private-key $devTestnetPrivateKey \
---rpc-url $baseSepoliaHTTPS \
---etherscan-api-key $basescanApiKey \
---broadcast \
---verify 
-```
+- Foundry 最新版本
+- Node.js (可选，用于额外工具)
+- 足够的 ETH 余额支付 gas 费用
 
-### Step 4: Deploy NonfungibleTokenPositionDescriptor
+## 📚 文档
 
-Use the --libraries flag in forge to link library NFTDescriptor to NonfungibleTokenPositionDescriptor
+- [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) - 详细部署指南
+- [Foundry 文档](https://book.getfoundry.sh/)
+- [Uniswap V3 文档](https://docs.uniswap.org/)
 
-Example:
+## 🤝 贡献
 
-https://github.com/foundry-rs/foundry/issues/4587#issuecomment-1522159970
+欢迎提交 Issue 和 Pull Request！
 
-Inside file:
+## 📄 许可证
 
-lib/v3-periphery/contracts/libraries/PoolAddress.sol
+MIT License
 
-go to:
+## ⚠️ 免责声明
 
-https://github.com/uniswap/v3-periphery/blob/main/contracts/libraries/PoolAddress.sol#L6
-
-then modify POOL_INIT_CODE_HASH to be the value you read from UniswapV3Factory after it was deployed:
-
-```solidity
-bytes32 internal constant POOL_INIT_CODE_HASH =  <UniswapV3Factory_POOL_INIT_CODE_HASH>;
-```
-
-Note: adding liquidity will fail if POOL_INIT_CODE_HASH is not set correctly.
-
-Script:
-
-```shell
-forge create lib/v3-periphery/contracts/NonfungibleTokenPositionDescriptor.sol:NonfungibleTokenPositionDescriptor  \
---constructor-args-path src/deployConstructor/NonfungibleTokenPositionDescriptor.txt \
---private-key $devTestnetPrivateKey \
---rpc-url $baseSepoliaHTTPS \
---etherscan-api-key $basescanApiKey \
---broadcast \
---libraries lib/v3-periphery/contracts/libraries/NFTDescriptor.sol:NFTDescriptor:<contract_address> \
---verify 
-```
-
-### Step 5: Deploy NonfungiblePositionManager
-
-Inside file:
-
-lib/v3-periphery/contracts/libraries/PoolAddress.sol
-
-go to:
-
-https://github.com/uniswap/v3-periphery/blob/main/contracts/libraries/PoolAddress.sol#L6
-
-then modify POOL_INIT_CODE_HASH to be the value you read from UniswapV3Factory after it was deployed:
-
-```solidity
-bytes32 internal constant POOL_INIT_CODE_HASH =  <UniswapV3Factory_POOL_INIT_CODE_HASH>;
-```
-
-Note: adding liquidity will fail if POOL_INIT_CODE_HASH is not set correctly.
-
-Script:
-
-```shell
-forge create lib/v3-periphery/contracts/NonfungiblePositionManager.sol:NonfungiblePositionManager  \
---constructor-args-path src/deployConstructor/NonfungiblePositionManager.txt \
---private-key $devTestnetPrivateKey \
---rpc-url $baseSepoliaHTTPS \
---etherscan-api-key $basescanApiKey \
---broadcast \
---verify 
-```
-
-## Deployments 
-
-### Base Sepolia
-
-#### UniswapV3Factory
-
-https://sepolia.basescan.org/address/0x25c1c9245098606091e74a6f07063e3ff50524e2#code
-
-#### SwapRouter
-
-https://sepolia.basescan.org/address/0xe0f5dfde6cc9770e2e45d91832cae8d4fee20526#code
-
-#### NFTDescriptor
-
-https://sepolia.basescan.org/address/0x6b0c2530ec1c8c4a56e2cfc6c4c2ecf5af0ea267#code
-
-#### NonfungibleTokenPositionDescriptor
-
-https://sepolia.basescan.org/address/0xc0135dfcf073d065fa07b499e32767e2ab3e2350#code
-
-#### NonfungiblePositionManager
-
-https://sepolia.basescan.org/address/0x8e83df10fbf319ff7344009a78b5bf2e89a5e4df#code 
+这是一个教育项目，请在生产环境中使用前进行充分测试。作者不对任何损失负责。 
 

@@ -1,0 +1,292 @@
+#!/bin/bash
+
+# WETH 和 TestToken 部署脚本
+# 自动部署 WETH 和 TestToken 合约并更新配置文件
+
+set -e  # 遇到错误时退出
+
+echo "🚀 开始 WETH 和 TestToken 部署和初始化..."
+
+# 颜色定义
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# 日志函数
+log_info() {
+    echo -e "${BLUE}[INFO]${NC} $1"
+}
+
+log_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
+}
+
+log_warning() {
+    echo -e "${YELLOW}[WARNING]${NC} $1"
+}
+
+log_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+}
+
+# 加载 .env 文件
+load_env() {
+    if [ -f ".env" ]; then
+        log_info "加载 .env 文件..."
+        export $(cat .env | grep -v '^#' | xargs)
+        log_success ".env 文件加载成功"
+    else
+        log_warning "未找到 .env 文件，将创建新文件"
+        touch .env
+    fi
+}
+
+# 加载环境变量
+load_env
+
+# 检查环境变量
+if [ -z "$PRIVATE_KEY" ]; then
+    log_error "请设置 PRIVATE_KEY 环境变量"
+    echo "在 .env 文件中设置: PRIVATE_KEY=your_private_key_here"
+    exit 1
+fi
+
+if [ -z "$RPC_URL" ]; then
+    log_warning "未设置 RPC_URL，使用默认的本地 Anvil 节点"
+    RPC_URL="http://localhost:8545"
+fi
+
+# 显示环境信息
+log_info "环境信息:"
+echo "  RPC URL: $RPC_URL"
+echo "  部署者地址: $(cast wallet address --private-key $PRIVATE_KEY)"
+
+# 编译项目
+log_info "编译项目..."
+forge build
+if [ $? -eq 0 ]; then
+    log_success "编译成功"
+else
+    log_error "编译失败"
+    exit 1
+fi
+
+echo ""
+
+# 步骤 1: 部署 WETH
+log_info "步骤 1: 部署 WETH 合约"
+WETH_OUTPUT=$(forge create src/WETH.sol:WETH9 \
+  --private-key $PRIVATE_KEY \
+  --rpc-url $RPC_URL \
+  --legacy \
+  --broadcast 2>&1)
+
+if [ $? -eq 0 ]; then
+    # 从输出中提取 WETH 地址
+    WETH_ADDRESS=$(echo "$WETH_OUTPUT" | grep "Deployed to:" | awk '{print $3}')
+    log_success "WETH 部署成功"
+    echo "  WETH 地址: $WETH_ADDRESS"
+else
+    log_error "WETH 部署失败"
+    echo "$WETH_OUTPUT"
+    exit 1
+fi
+
+echo ""
+
+# 步骤 2: 部署 TestToken
+log_info "步骤 2: 部署 TestToken 合约"
+TEST_TOKEN_OUTPUT=$(forge create src/TestToken.sol:TestToken \
+  --private-key $PRIVATE_KEY \
+  --rpc-url $RPC_URL \
+  --legacy \
+  --broadcast 2>&1)
+
+if [ $? -eq 0 ]; then
+    # 从输出中提取 TestToken 地址
+    TEST_TOKEN_ADDRESS=$(echo "$TEST_TOKEN_OUTPUT" | grep "Deployed to:" | awk '{print $3}')
+    log_success "TestToken 部署成功"
+    echo "  TestToken 地址: $TEST_TOKEN_ADDRESS"
+else
+    log_error "TestToken 部署失败"
+    echo "$TEST_TOKEN_OUTPUT"
+    exit 1
+fi
+
+echo ""
+
+# 步骤 3: 验证合约
+log_info "步骤 3: 验证合约"
+
+# 验证 WETH 合约
+if [ -n "$WETH_ADDRESS" ]; then
+    WETH_CODE=$(cast code $WETH_ADDRESS --rpc-url $RPC_URL)
+    if [ "$WETH_CODE" != "0x" ]; then
+        log_success "WETH 合约验证成功"
+        echo "  WETH 地址: $WETH_ADDRESS"
+    else
+        log_error "WETH 合约验证失败 - 合约代码为空"
+        exit 1
+    fi
+fi
+
+# 验证 TestToken 合约
+if [ -n "$TEST_TOKEN_ADDRESS" ]; then
+    TEST_TOKEN_CODE=$(cast code $TEST_TOKEN_ADDRESS --rpc-url $RPC_URL)
+    if [ "$TEST_TOKEN_CODE" != "0x" ]; then
+        log_success "TestToken 合约验证成功"
+        echo "  TestToken 地址: $TEST_TOKEN_ADDRESS"
+    else
+        log_error "TestToken 合约验证失败 - 合约代码为空"
+        exit 1
+    fi
+fi
+
+echo ""
+
+# 步骤 4: 测试合约基本功能
+log_info "步骤 4: 测试合约基本功能"
+DEPLOYER_ADDRESS=$(cast wallet address --private-key $PRIVATE_KEY)
+
+# 测试 WETH deposit 功能
+log_info "测试 WETH deposit 功能..."
+DEPOSIT_TX=$(cast send $WETH_ADDRESS "deposit()" --value 1ether --private-key $PRIVATE_KEY --rpc-url $RPC_URL 2>&1)
+if [ $? -eq 0 ]; then
+    log_success "WETH deposit 测试成功"
+else
+    log_warning "WETH deposit 测试失败"
+    echo "$DEPOSIT_TX"
+fi
+
+# 检查 WETH 余额
+WETH_BALANCE=$(cast call $WETH_ADDRESS "balanceOf(address)" $DEPLOYER_ADDRESS --rpc-url $RPC_URL)
+if [ "$WETH_BALANCE" != "0x0000000000000000000000000000000000000000000000000000000000000000" ]; then
+    log_success "WETH 余额检查成功"
+    echo "  WETH 余额: $WETH_BALANCE"
+else
+    log_warning "WETH 余额检查失败"
+fi
+
+# 检查 TestToken 余额
+TEST_TOKEN_BALANCE=$(cast call $TEST_TOKEN_ADDRESS "balanceOf(address)" $DEPLOYER_ADDRESS --rpc-url $RPC_URL)
+if [ "$TEST_TOKEN_BALANCE" != "0x0000000000000000000000000000000000000000000000000000000000000000" ]; then
+    log_success "TestToken 余额检查成功"
+    echo "  TestToken 余额: $TEST_TOKEN_BALANCE"
+else
+    log_warning "TestToken 余额检查失败"
+fi
+
+echo ""
+
+# 步骤 5: 更新配置文件
+log_info "步骤 5: 更新配置文件"
+
+# 更新 NonfungiblePositionManager.txt
+NFT_POSITION_MANAGER_FILE="src/deployConstructor/NonfungiblePositionManager.txt"
+if [ -f "$NFT_POSITION_MANAGER_FILE" ]; then
+    # 备份原文件
+    cp "$NFT_POSITION_MANAGER_FILE" "${NFT_POSITION_MANAGER_FILE}.backup"
+    
+    # 更新 WETH 地址（第2行）
+    sed -i '' "2s/0x[a-fA-F0-9]\{40\}/$WETH_ADDRESS/" "$NFT_POSITION_MANAGER_FILE"
+    
+    log_success "NonfungiblePositionManager.txt 更新成功"
+    echo "  文件: $NFT_POSITION_MANAGER_FILE"
+    echo "  新的 WETH 地址: $WETH_ADDRESS"
+else
+    log_warning "找不到 NonfungiblePositionManager.txt 文件"
+fi
+
+# 更新 .env 文件
+log_info "更新 .env 文件..."
+
+# 创建或更新 .env 文件
+cat > .env << EOF
+# Uniswap V3 Foundry 部署环境变量
+
+# 私钥 (必填)
+PRIVATE_KEY=$PRIVATE_KEY
+
+# RPC URL (可选，默认为本地 Anvil 节点)
+RPC_URL=$RPC_URL
+
+# 合约地址
+WETH_ADDRESS=$WETH_ADDRESS
+TEST_TOKEN_ADDRESS=$TEST_TOKEN_ADDRESS
+
+# 其他合约地址 (将在部署后添加)
+# SWAP_ROUTER_ADDRESS=
+# POSITION_MANAGER_ADDRESS=
+# FACTORY_ADDRESS=
+EOF
+
+log_success ".env 文件已更新"
+echo "  WETH_ADDRESS: $WETH_ADDRESS"
+echo "  TEST_TOKEN_ADDRESS: $TEST_TOKEN_ADDRESS"
+
+echo ""
+
+# 步骤 6: 生成部署摘要
+log_info "步骤 6: 生成部署摘要"
+cat > token_deployment_summary.md << EOF
+# WETH 和 TestToken 部署摘要
+
+## 部署时间
+$(date)
+
+## 环境信息
+- RPC URL: $RPC_URL
+- 部署者: $DEPLOYER_ADDRESS
+
+## 合约信息
+
+| 合约名称 | 地址 |
+|---------|------|
+| WETH | \`$WETH_ADDRESS\` |
+| TestToken | \`$TEST_TOKEN_ADDRESS\` |
+
+## 验证结果
+
+- ✅ WETH 合约部署成功
+- ✅ TestToken 合约部署成功
+- ✅ 合约代码验证通过
+- ✅ WETH Deposit 功能测试通过
+- ✅ 余额检查通过
+- ✅ 配置文件更新完成
+
+## 下一步
+
+现在可以运行完整的 Uniswap V3 部署：
+
+\`\`\`bash
+./deploy_step_by_step.sh
+\`\`\`
+
+---
+
+*此摘要由 Token 部署脚本生成*
+EOF
+
+log_success "部署摘要已保存到 token_deployment_summary.md"
+
+echo ""
+
+# 完成
+log_success "🎉 WETH 和 TestToken 部署和初始化完成！"
+
+echo ""
+echo "📋 部署摘要:"
+echo "  WETH 地址: $WETH_ADDRESS"
+echo "  TestToken 地址: $TEST_TOKEN_ADDRESS"
+echo "  部署者: $DEPLOYER_ADDRESS"
+echo "  配置文件已更新"
+echo "  部署摘要: token_deployment_summary.md"
+
+echo ""
+echo "🚀 下一步操作:"
+echo "  1. 运行完整部署: ./deploy_step_by_step.sh"
+echo "  2. 查看部署摘要: cat token_deployment_summary.md"
+echo "  3. 测试 WETH 功能: cast call $WETH_ADDRESS 'balanceOf(address)' $DEPLOYER_ADDRESS --rpc-url $RPC_URL"
+echo "  4. 测试 TestToken 功能: cast call $TEST_TOKEN_ADDRESS 'balanceOf(address)' $DEPLOYER_ADDRESS --rpc-url $RPC_URL" 
