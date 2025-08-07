@@ -86,15 +86,21 @@ contract LiquidityManagement is Script {
         address wethAddress,
         address testTokenAddress
     ) internal {
-        // === Add Liquidity ===
+        console.log("=== Add Liquidity ===");
         
         // 获取当前余额
         uint256 wethBalance = IERC20(wethAddress).balanceOf(deployer);
         uint256 testTokenBalance = IERC20(testTokenAddress).balanceOf(deployer);
         
-        // Balance before adding liquidity:
-        // WETH: wethBalance
-        // TestToken: testTokenBalance
+        console.log("Balance before adding liquidity:");
+        console.log("  WETH (wei):");
+        console.logUint(wethBalance);
+        console.log("  WETH (ETH):");
+        console.logUint(wethBalance / 10**18);
+        console.log("  TestToken (wei):");
+        console.logUint(testTokenBalance);
+        console.log("  TestToken (tokens):");
+        console.logUint(testTokenBalance / 10**18);
         
         // 创建流动性位置
         (uint256 tokenId, uint128 liquidity, uint256 amount0, uint256 amount1) = positionManager.mint(
@@ -115,19 +121,43 @@ contract LiquidityManagement is Script {
         
         createdTokenId = tokenId;
         
-        // Liquidity added successfully!
-        // TokenId: tokenId
-        // Liquidity amount: liquidity
-        // Token0 used: amount0
-        // Token1 used: amount1
+        console.log("=== Liquidity Added Successfully ===");
+        console.log("TokenId:");
+        console.logUint(tokenId);
+        console.log("Liquidity amount:");
+        console.logUint(liquidity);
+        console.log("Token0 used (wei):");
+        console.logUint(amount0);
+        console.log("Token1 used (wei):");
+        console.logUint(amount1);
         
         // 显示添加后的余额
         uint256 newWethBalance = IERC20(wethAddress).balanceOf(deployer);
         uint256 newTestTokenBalance = IERC20(testTokenAddress).balanceOf(deployer);
         
-        // Balance after adding liquidity:
-        // WETH: newWethBalance
-        // TestToken: newTestTokenBalance
+        console.log("=== Balance After Adding Liquidity ===");
+        console.log("WETH (wei):");
+        console.logUint(newWethBalance);
+        console.log("WETH (ETH):");
+        console.logUint(newWethBalance / 10**18);
+        console.log("TestToken (wei):");
+        console.logUint(newTestTokenBalance);
+        console.log("TestToken (tokens):");
+        console.logUint(newTestTokenBalance / 10**18);
+        
+        // 计算并显示差额
+        uint256 wethDifference = wethBalance - newWethBalance;
+        uint256 testTokenDifference = testTokenBalance - newTestTokenBalance;
+        
+        console.log("=== Balance Changes ===");
+        console.log("WETH used (wei):");
+        console.logUint(wethDifference);
+        console.log("WETH used (ETH):");
+        console.logUint(wethDifference / 10**18);
+        console.log("TestToken used (wei):");
+        console.logUint(testTokenDifference);
+        console.log("TestToken used (tokens):");
+        console.logUint(testTokenDifference / 10**18);
     }
     
     function _increaseLiquidity(
@@ -136,12 +166,13 @@ contract LiquidityManagement is Script {
         address wethAddress,
         address testTokenAddress
     ) internal {
-        // === Increase Liquidity ===
+        console.log("=== Increase Liquidity ===");
         
         // 获取位置信息
         (,,,,,,,uint128 currentLiquidity,,,,) = positionManager.positions(createdTokenId);
         
-        // Current liquidity: currentLiquidity
+        console.log("Current liquidity:");
+        console.logUint(currentLiquidity);
         
         // 增加流动性
         (uint128 newLiquidity, uint256 amount0, uint256 amount1) = positionManager.increaseLiquidity(
@@ -155,29 +186,47 @@ contract LiquidityManagement is Script {
             })
         );
         
-        // Liquidity increased successfully!
-        // New liquidity: newLiquidity
-        // Token0 used: amount0
-        // Token1 used: amount1
+        console.log("=== Liquidity Increased Successfully ===");
+        console.log("New liquidity added:");
+        console.logUint(newLiquidity);
+        console.log("Token0 used (wei):");
+        console.logUint(amount0);
+        console.log("Token1 used (wei):");
+        console.logUint(amount1);
         
         // 显示增加后的总流动性
         (,,,,,,,uint128 totalLiquidity,,,,) = positionManager.positions(createdTokenId);
         
-        // Total liquidity: totalLiquidity
+        console.log("=== Total Liquidity After Increase ===");
+        console.log("Total liquidity:");
+        console.logUint(totalLiquidity);
+        
+        // 计算并显示流动性增加量
+        uint128 liquidityIncrease = totalLiquidity - currentLiquidity;
+        
+        console.log("=== Liquidity Changes ===");
+        console.log("Liquidity increase:");
+        console.logUint(liquidityIncrease);
+        console.log("Previous liquidity:");
+        console.logUint(currentLiquidity);
+        console.log("New total liquidity:");
+        console.logUint(totalLiquidity);
     }
     
     function _collectFees(
         address deployer,
         INonfungiblePositionManager positionManager
     ) internal {
-        // === Collect Fees ===
+        console.log("=== Collect Fees ===");
         
         // 获取当前欠款
         (,,,,,,,,,,uint128 tokensOwed0,uint128 tokensOwed1) = positionManager.positions(createdTokenId);
         
-        // Current fees owed:
-        // Token0 owed: tokensOwed0
-        // Token1 owed: tokensOwed1
+        console.log("Current fees owed:");
+        console.log("  Token0 owed (wei):");
+        console.logUint(tokensOwed0);
+        console.log("  Token1 owed (wei):");
+        console.logUint(tokensOwed1);
         
         // 收集费用
         (uint256 amount0, uint256 amount1) = positionManager.collect(
@@ -189,24 +238,30 @@ contract LiquidityManagement is Script {
             })
         );
         
-        // Fees collected successfully!
-        // Token0 collected: amount0
-        // Token1 collected: amount1
+        console.log("=== Fees Collected Successfully ===");
+        console.log("Token0 collected (wei):");
+        console.logUint(amount0);
+        console.log("Token1 collected (wei):");
+        console.logUint(amount1);
     }
     
     function _decreaseLiquidity(
         address deployer,
         INonfungiblePositionManager positionManager
     ) internal {
-        // === Decrease Liquidity ===
+        console.log("=== Decrease Liquidity ===");
         
         // 获取当前流动性
         (,,,,,,,uint128 currentLiquidity,,,,) = positionManager.positions(createdTokenId);
         
-        // Current liquidity: currentLiquidity
+        console.log("Current liquidity:");
+        console.logUint(currentLiquidity);
         
         // 减少一半流动性
         uint128 decreaseAmount = currentLiquidity / 2;
+        
+        console.log("Decreasing liquidity by:");
+        console.logUint(decreaseAmount);
         
         (uint256 amount0, uint256 amount1) = positionManager.decreaseLiquidity(
             INonfungiblePositionManager.DecreaseLiquidityParams({
@@ -218,24 +273,43 @@ contract LiquidityManagement is Script {
             })
         );
         
-        // Liquidity decreased successfully!
-        // Decreased liquidity: decreaseAmount
-        // Token0 returned: amount0
-        // Token1 returned: amount1
+        console.log("=== Liquidity Decreased Successfully ===");
+        console.log("Decreased liquidity:");
+        console.logUint(decreaseAmount);
+        console.log("Token0 returned (wei):");
+        console.logUint(amount0);
+        console.log("Token1 returned (wei):");
+        console.logUint(amount1);
         
         // 显示减少后的流动性
         (,,,,,,,uint128 remainingLiquidity,,,,) = positionManager.positions(createdTokenId);
         
-        // Remaining liquidity: remainingLiquidity
+        console.log("=== Remaining Liquidity ===");
+        console.log("Remaining liquidity:");
+        console.logUint(remainingLiquidity);
+        
+        // 计算并显示流动性减少量
+        uint128 liquidityDecrease = currentLiquidity - remainingLiquidity;
+        
+        console.log("=== Liquidity Changes ===");
+        console.log("Liquidity decrease:");
+        console.logUint(liquidityDecrease);
+        console.log("Previous liquidity:");
+        console.logUint(currentLiquidity);
+        console.log("Remaining liquidity:");
+        console.logUint(remainingLiquidity);
     }
     
     function _burnPosition(
         address deployer,
         INonfungiblePositionManager positionManager
     ) internal {
-        // === Burn Position ===
+        console.log("=== Burn Position ===");
+        console.log("TokenId to burn:");
+        console.logUint(createdTokenId);
         
         // 首先收集所有剩余费用
+        console.log("Collecting remaining fees...");
         positionManager.collect(
             INonfungiblePositionManager.CollectParams({
                 tokenId: createdTokenId,
@@ -248,7 +322,11 @@ contract LiquidityManagement is Script {
         // 减少所有剩余流动性
         (,,,,,,,uint128 remainingLiquidity,,,,) = positionManager.positions(createdTokenId);
         
+        console.log("Remaining liquidity before burn:");
+        console.logUint(remainingLiquidity);
+        
         if (remainingLiquidity > 0) {
+            console.log("Decreasing remaining liquidity...");
             positionManager.decreaseLiquidity(
                 INonfungiblePositionManager.DecreaseLiquidityParams({
                     tokenId: createdTokenId,
@@ -261,6 +339,7 @@ contract LiquidityManagement is Script {
         }
         
         // 最后收集所有费用
+        console.log("Collecting final fees...");
         positionManager.collect(
             INonfungiblePositionManager.CollectParams({
                 tokenId: createdTokenId,
@@ -271,10 +350,12 @@ contract LiquidityManagement is Script {
         );
         
         // 销毁位置
+        console.log("Burning position...");
         positionManager.burn(createdTokenId);
         
-        // Position burned successfully!
-        // TokenId: createdTokenId
+        console.log("=== Position Burned Successfully ===");
+        console.log("TokenId burned:");
+        console.logUint(createdTokenId);
     }
     
     // 仅添加流动性

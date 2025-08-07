@@ -16,7 +16,7 @@ contract DeployQuoterV2 is Script {
         address wethAddress = vm.envAddress("WETH_ADDRESS");
         
         console.log("=== Deploy QuoterV2 ===");
-        console.log("Deployer:", deployer);
+        console.log("Deployer address:", deployer);
         console.log("Factory address:", factoryAddress);
         console.log("WETH address:", wethAddress);
         
@@ -29,11 +29,12 @@ contract DeployQuoterV2 is Script {
         vm.stopBroadcast();
         
         // 输出部署结果
+        console.log("=== Deployment Result ===");
         console.log("QuoterV2 deployed successfully!");
-        console.log("QuoterV2 address:", address(quoterV2));
+        console.log("QuoterV2 contract address:", address(quoterV2));
         
         // 验证部署
-        console.log("=== Verification ===");
+        console.log("=== Contract Verification ===");
         console.log("Factory from QuoterV2:", quoterV2.factory());
         console.log("WETH9 from QuoterV2:", quoterV2.WETH9());
         
@@ -91,6 +92,8 @@ contract DeployQuoterV2 is Script {
         
         console.log("=== Test QuoterV2 ===");
         console.log("Testing quote for WETH -> TestToken swap");
+        console.log("Amount in: 1 ETH (1000000000000000000 wei)");
+        console.log("Fee tier: 3000 (0.3%)");
         
         try quoterV2.quoteExactInputSingle(
             IQuoterV2.QuoteExactInputSingleParams({
@@ -106,14 +109,23 @@ contract DeployQuoterV2 is Script {
             uint32 initializedTicksCrossed,
             uint256 gasEstimate
         ) {
+            console.log("=== Quote Result ===");
             console.log("Quote successful!");
-            console.log("Amount out:", amountOut);
-            console.log("Sqrt price after:", uint256(sqrtPriceX96After));
-            console.log("Initialized ticks crossed:", uint256(initializedTicksCrossed));
-            console.log("Gas estimate:", gasEstimate);
+            console.log("Amount out (wei):");
+            console.logUint(amountOut);
+            console.log("Amount out (tokens):");
+            console.logUint(amountOut / 10**18);
+            console.log("Sqrt price after:");
+            console.logUint(uint256(sqrtPriceX96After));
+            console.log("Initialized ticks crossed:");
+            console.logUint(uint256(initializedTicksCrossed));
+            console.log("Gas estimate:");
+            console.logUint(gasEstimate);
         } catch Error(string memory reason) {
+            console.log("=== Quote Failed ===");
             console.log("Quote failed with reason:", reason);
         } catch {
+            console.log("=== Quote Failed ===");
             console.log("Quote failed with unknown error");
         }
     }

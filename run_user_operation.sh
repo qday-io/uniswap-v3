@@ -78,7 +78,7 @@ run_operation() {
     esac
     
     echo "执行用户操作: $operation"
-    forge script script/useOperation.s.sol:UseOperation --sig "$function_name" --rpc-url $RPC_URL --broadcast
+    forge script script/useOperation.s.sol:UseOperation --sig "$function_name" --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --legacy 
 }
 
 # 主函数
