@@ -73,9 +73,9 @@ test_quoterV2() {
         exit 1
     fi
     
-    if [ -z "$TEST_TOKEN_ADDRESS" ]; then
-        echo "Error: TEST_TOKEN_ADDRESS not set"
-        echo "Please set TEST_TOKEN_ADDRESS environment variable"
+    if [ -z "$PQUSD_ADDRESS" ]; then
+        echo "Error: PQUSD_ADDRESS not set"
+        echo "Please set PQUSD_ADDRESS environment variable"
         exit 1
     fi
     

@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# WETH 和 TestToken 部署脚本
-# 自动部署 WETH 和 TestToken 合约并更新配置文件
+# WETH 和 PQUSD 部署脚本
+# 自动部署 WETH 和 PQUSD 合约并更新配置文件
 
 set -e  # 遇到错误时退出
 
-echo "🚀 开始 WETH 和 TestToken 部署和初始化..."
+echo "🚀 开始 WETH 和 PQUSD 部署和初始化..."
 
 # 颜色定义
 RED='\033[0;31m'
@@ -96,22 +96,22 @@ fi
 
 echo ""
 
-# 步骤 2: 部署 TestToken
-log_info "步骤 2: 部署 TestToken 合约"
-TEST_TOKEN_OUTPUT=$(forge create src/TestToken.sol:TestToken \
+# 步骤 2: 部署 PQUSD
+log_info "步骤 2: 部署 PQUSD 合约"
+PQUSD_OUTPUT=$(forge create src/PQUSD.sol:PQUSD \
   --private-key $PRIVATE_KEY \
   --rpc-url $RPC_URL \
   --legacy \
   --broadcast 2>&1)
 
 if [ $? -eq 0 ]; then
-    # 从输出中提取 TestToken 地址
-    TEST_TOKEN_ADDRESS=$(echo "$TEST_TOKEN_OUTPUT" | grep "Deployed to:" | awk '{print $3}')
-    log_success "TestToken 部署成功"
-    echo "  TestToken 地址: $TEST_TOKEN_ADDRESS"
+    # 从输出中提取 PQUSD 地址
+    PQUSD_ADDRESS=$(echo "$PQUSD_OUTPUT" | grep "Deployed to:" | awk '{print $3}')
+    log_success "PQUSD 部署成功"
+    echo "  PQUSD 地址: $PQUSD_ADDRESS"
 else
-    log_error "TestToken 部署失败"
-    echo "$TEST_TOKEN_OUTPUT"
+    log_error "PQUSD 部署失败"
+    echo "$PQUSD_OUTPUT"
     exit 1
 fi
 
@@ -132,14 +132,14 @@ if [ -n "$WETH_ADDRESS" ]; then
     fi
 fi
 
-# 验证 TestToken 合约
-if [ -n "$TEST_TOKEN_ADDRESS" ]; then
-    TEST_TOKEN_CODE=$(cast code $TEST_TOKEN_ADDRESS --rpc-url $RPC_URL)
-    if [ "$TEST_TOKEN_CODE" != "0x" ]; then
-        log_success "TestToken 合约验证成功"
-        echo "  TestToken 地址: $TEST_TOKEN_ADDRESS"
+# 验证 PQUSD 合约
+if [ -n "$PQUSD_ADDRESS" ]; then
+    PQUSD_CODE=$(cast code $PQUSD_ADDRESS --rpc-url $RPC_URL)
+    if [ "$PQUSD_CODE" != "0x" ]; then
+        log_success "PQUSD 合约验证成功"
+        echo "  PQUSD 地址: $PQUSD_ADDRESS"
     else
-        log_error "TestToken 合约验证失败 - 合约代码为空"
+        log_error "PQUSD 合约验证失败 - 合约代码为空"
         exit 1
     fi
 fi
@@ -169,13 +169,13 @@ else
     log_warning "WETH 余额检查失败"
 fi
 
-# 检查 TestToken 余额
-TEST_TOKEN_BALANCE=$(cast call $TEST_TOKEN_ADDRESS "balanceOf(address)" $DEPLOYER_ADDRESS --rpc-url $RPC_URL)
-if [ "$TEST_TOKEN_BALANCE" != "0x0000000000000000000000000000000000000000000000000000000000000000" ]; then
-    log_success "TestToken 余额检查成功"
-    echo "  TestToken 余额: $TEST_TOKEN_BALANCE"
+# 检查 PQUSD 余额
+PQUSD_BALANCE=$(cast call $PQUSD_ADDRESS "balanceOf(address)" $DEPLOYER_ADDRESS --rpc-url $RPC_URL)
+if [ "$PQUSD_BALANCE" != "0x0000000000000000000000000000000000000000000000000000000000000000" ]; then
+    log_success "PQUSD 余额检查成功"
+    echo "  PQUSD 余额: $PQUSD_BALANCE"
 else
-    log_warning "TestToken 余额检查失败"
+    log_warning "PQUSD 余额检查失败"
 fi
 
 echo ""
@@ -214,7 +214,7 @@ RPC_URL=$RPC_URL
 
 # 合约地址
 WETH_ADDRESS=$WETH_ADDRESS
-TEST_TOKEN_ADDRESS=$TEST_TOKEN_ADDRESS
+PQUSD_ADDRESS=$PQUSD_ADDRESS
 
 # 其他合约地址 (将在部署后添加)
 # SWAP_ROUTER_ADDRESS=
@@ -224,14 +224,14 @@ EOF
 
 log_success ".env 文件已更新"
 echo "  WETH_ADDRESS: $WETH_ADDRESS"
-echo "  TEST_TOKEN_ADDRESS: $TEST_TOKEN_ADDRESS"
+echo "  PQUSD_ADDRESS: $PQUSD_ADDRESS"
 
 echo ""
 
 # 步骤 6: 生成部署摘要
 log_info "步骤 6: 生成部署摘要"
 cat > token_deployment_summary.md << EOF
-# WETH 和 TestToken 部署摘要
+# WETH 和 PQUSD 部署摘要
 
 ## 部署时间
 $(date)
@@ -245,12 +245,12 @@ $(date)
 | 合约名称 | 地址 |
 |---------|------|
 | WETH | \`$WETH_ADDRESS\` |
-| TestToken | \`$TEST_TOKEN_ADDRESS\` |
+| PQUSD | \`$PQUSD_ADDRESS\` |
 
 ## 验证结果
 
 - ✅ WETH 合约部署成功
-- ✅ TestToken 合约部署成功
+- ✅ PQUSD 合约部署成功
 - ✅ 合约代码验证通过
 - ✅ WETH Deposit 功能测试通过
 - ✅ 余额检查通过
@@ -274,12 +274,12 @@ log_success "部署摘要已保存到 token_deployment_summary.md"
 echo ""
 
 # 完成
-log_success "🎉 WETH 和 TestToken 部署和初始化完成！"
+log_success "🎉 WETH 和 PQUSD 部署和初始化完成！"
 
 echo ""
 echo "📋 部署摘要:"
 echo "  WETH 地址: $WETH_ADDRESS"
-echo "  TestToken 地址: $TEST_TOKEN_ADDRESS"
+echo "  PQUSD 地址: $PQUSD_ADDRESS"
 echo "  部署者: $DEPLOYER_ADDRESS"
 echo "  配置文件已更新"
 echo "  部署摘要: token_deployment_summary.md"
@@ -289,4 +289,4 @@ echo "🚀 下一步操作:"
 echo "  1. 运行完整部署: ./deploy_step_by_step.sh"
 echo "  2. 查看部署摘要: cat token_deployment_summary.md"
 echo "  3. 测试 WETH 功能: cast call $WETH_ADDRESS 'balanceOf(address)' $DEPLOYER_ADDRESS --rpc-url $RPC_URL"
-echo "  4. 测试 TestToken 功能: cast call $TEST_TOKEN_ADDRESS 'balanceOf(address)' $DEPLOYER_ADDRESS --rpc-url $RPC_URL" 
+echo "  4. 测试 PQUSD 功能: cast call $PQUSD_ADDRESS 'balanceOf(address)' $DEPLOYER_ADDRESS --rpc-url $RPC_URL" 

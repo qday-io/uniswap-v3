@@ -78,7 +78,7 @@ WETH_CODE=$(cast code $WETH_ADDRESS --rpc-url $RPC_URL 2>/dev/null)
 if [ "$WETH_CODE" = "0x" ] || [ -z "$WETH_CODE" ]; then
     log_error "WETH 合约验证失败 - 地址 $WETH_ADDRESS 没有合约代码"
     echo "请先运行 WETH 部署脚本:"
-    echo "  ./deploy_weth.sh"
+    echo "  ./deploy_weth_pqusd.sh"
     exit 1
 else
     log_success "WETH 合约验证成功"

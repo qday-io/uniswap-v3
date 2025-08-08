@@ -23,7 +23,7 @@ contract LiquidityManagement is Script {
         
         // 从环境变量读取合约地址
         address payable wethAddress = payable(vm.envAddress("WETH_ADDRESS"));
-        address payable testTokenAddress = payable(vm.envAddress("TEST_TOKEN_ADDRESS"));
+        address payable pqusdAddress = payable(vm.envAddress("PQUSD_ADDRESS"));
         address payable positionManagerAddress = payable(vm.envAddress("POSITION_MANAGER_ADDRESS"));
         address payable factoryAddress = payable(vm.envAddress("FACTORY_ADDRESS"));
         
@@ -32,15 +32,15 @@ contract LiquidityManagement is Script {
         INonfungiblePositionManager positionManager = INonfungiblePositionManager(positionManagerAddress);
         
         // 确保有足够的授权
-        _ensureAllowances(deployer, wethAddress, testTokenAddress, positionManagerAddress);
+        _ensureAllowances(deployer, wethAddress, pqusdAddress, positionManagerAddress);
         
         // 开始广播交易
         vm.startBroadcast(deployer);
         
         // 确保池存在并已初始化
-        address poolAddress = factory.getPool(wethAddress, testTokenAddress, 3000);
+        address poolAddress = factory.getPool(wethAddress, pqusdAddress, 3000);
         if (poolAddress == address(0)) {
-            poolAddress = factory.createPool(wethAddress, testTokenAddress, 3000);
+            poolAddress = factory.createPool(wethAddress, pqusdAddress, 3000);
         }
         IUniswapV3Pool pool = IUniswapV3Pool(poolAddress);
         
@@ -51,8 +51,8 @@ contract LiquidityManagement is Script {
         }
         
         // 执行流动性管理操作
-        _addLiquidity(deployer, positionManager, wethAddress, testTokenAddress);
-        _increaseLiquidity(deployer, positionManager, wethAddress, testTokenAddress);
+        _addLiquidity(deployer, positionManager, wethAddress, pqusdAddress);
+        _increaseLiquidity(deployer, positionManager, wethAddress, pqusdAddress);
         // _collectFees(deployer, positionManager);
         // _decreaseLiquidity(deployer, positionManager);
         // _burnPosition(deployer, positionManager);
@@ -64,7 +64,7 @@ contract LiquidityManagement is Script {
     function _ensureAllowances(
         address deployer,
         address wethAddress,
-        address testTokenAddress,
+        address pqusdAddress,
         address positionManagerAddress
     ) internal {
         // 检查并设置 WETH 授权
@@ -73,10 +73,10 @@ contract LiquidityManagement is Script {
             IERC20(wethAddress).approve(positionManagerAddress, type(uint256).max);
         }
         
-        // 检查并设置 TestToken 授权
-        uint256 testTokenAllowance = IERC20(testTokenAddress).allowance(deployer, positionManagerAddress);
-        if (testTokenAllowance < 1000000000000000000000) { // 1000 tokens
-            IERC20(testTokenAddress).approve(positionManagerAddress, type(uint256).max);
+        // 检查并设置 PQUSD 授权
+        uint256 pqusdAllowance = IERC20(pqusdAddress).allowance(deployer, positionManagerAddress);
+        if (pqusdAllowance < 1000000000000000000000) { // 1000 tokens
+            IERC20(pqusdAddress).approve(positionManagerAddress, type(uint256).max);
         }
     }
     
@@ -84,29 +84,29 @@ contract LiquidityManagement is Script {
         address deployer,
         INonfungiblePositionManager positionManager,
         address wethAddress,
-        address testTokenAddress
+        address pqusdAddress
     ) internal {
         console.log("=== Add Liquidity ===");
         
         // 获取当前余额
         uint256 wethBalance = IERC20(wethAddress).balanceOf(deployer);
-        uint256 testTokenBalance = IERC20(testTokenAddress).balanceOf(deployer);
+        uint256 pqusdBalance = IERC20(pqusdAddress).balanceOf(deployer);
         
         console.log("Balance before adding liquidity:");
         console.log("  WETH (wei):");
         console.logUint(wethBalance);
         console.log("  WETH (ETH):");
         console.logUint(wethBalance / 10**18);
-        console.log("  TestToken (wei):");
-        console.logUint(testTokenBalance);
-        console.log("  TestToken (tokens):");
-        console.logUint(testTokenBalance / 10**18);
+        console.log("  PQUSD (wei):");
+        console.logUint(pqusdBalance);
+        console.log("  PQUSD (tokens):");
+        console.logUint(pqusdBalance / 10**18);
         
         // 创建流动性位置
         (uint256 tokenId, uint128 liquidity, uint256 amount0, uint256 amount1) = positionManager.mint(
             INonfungiblePositionManager.MintParams({
-                token0: wethAddress < testTokenAddress ? wethAddress : testTokenAddress,
-                token1: wethAddress < testTokenAddress ? testTokenAddress : wethAddress,
+                token0: wethAddress < pqusdAddress ? wethAddress : pqusdAddress,
+                token1: wethAddress < pqusdAddress ? pqusdAddress : wethAddress,
                 fee: 3000,
                 tickLower: -887220,
                 tickUpper: 887220,
@@ -133,38 +133,38 @@ contract LiquidityManagement is Script {
         
         // 显示添加后的余额
         uint256 newWethBalance = IERC20(wethAddress).balanceOf(deployer);
-        uint256 newTestTokenBalance = IERC20(testTokenAddress).balanceOf(deployer);
+        uint256 newPqusdBalance = IERC20(pqusdAddress).balanceOf(deployer);
         
         console.log("=== Balance After Adding Liquidity ===");
         console.log("WETH (wei):");
         console.logUint(newWethBalance);
         console.log("WETH (ETH):");
         console.logUint(newWethBalance / 10**18);
-        console.log("TestToken (wei):");
-        console.logUint(newTestTokenBalance);
-        console.log("TestToken (tokens):");
-        console.logUint(newTestTokenBalance / 10**18);
+        console.log("PQUSD (wei):");
+        console.logUint(newPqusdBalance);
+        console.log("PQUSD (tokens):");
+        console.logUint(newPqusdBalance / 10**18);
         
         // 计算并显示差额
         uint256 wethDifference = wethBalance - newWethBalance;
-        uint256 testTokenDifference = testTokenBalance - newTestTokenBalance;
+        uint256 pqusdDifference = pqusdBalance - newPqusdBalance;
         
         console.log("=== Balance Changes ===");
         console.log("WETH used (wei):");
         console.logUint(wethDifference);
         console.log("WETH used (ETH):");
         console.logUint(wethDifference / 10**18);
-        console.log("TestToken used (wei):");
-        console.logUint(testTokenDifference);
-        console.log("TestToken used (tokens):");
-        console.logUint(testTokenDifference / 10**18);
+        console.log("PQUSD used (wei):");
+        console.logUint(pqusdDifference);
+        console.log("PQUSD used (tokens):");
+        console.logUint(pqusdDifference / 10**18);
     }
     
     function _increaseLiquidity(
         address deployer,
         INonfungiblePositionManager positionManager,
         address wethAddress,
-        address testTokenAddress
+        address pqusdAddress
     ) internal {
         console.log("=== Increase Liquidity ===");
         
@@ -364,7 +364,7 @@ contract LiquidityManagement is Script {
         
         // 从环境变量读取合约地址
         address payable wethAddress = payable(vm.envAddress("WETH_ADDRESS"));
-        address payable testTokenAddress = payable(vm.envAddress("TEST_TOKEN_ADDRESS"));
+        address payable pqusdAddress = payable(vm.envAddress("PQUSD_ADDRESS"));
         address payable positionManagerAddress = payable(vm.envAddress("POSITION_MANAGER_ADDRESS"));
         address payable factoryAddress = payable(vm.envAddress("FACTORY_ADDRESS"));
         
@@ -373,15 +373,15 @@ contract LiquidityManagement is Script {
         INonfungiblePositionManager positionManager = INonfungiblePositionManager(positionManagerAddress);
         
         // 确保有足够的授权
-        _ensureAllowances(deployer, wethAddress, testTokenAddress, positionManagerAddress);
+        _ensureAllowances(deployer, wethAddress, pqusdAddress, positionManagerAddress);
         
         // 开始广播交易
         vm.startBroadcast(deployer);
         
         // 确保池存在并已初始化
-        address poolAddress = factory.getPool(wethAddress, testTokenAddress, 3000);
+        address poolAddress = factory.getPool(wethAddress, pqusdAddress, 3000);
         if (poolAddress == address(0)) {
-            poolAddress = factory.createPool(wethAddress, testTokenAddress, 3000);
+            poolAddress = factory.createPool(wethAddress, pqusdAddress, 3000);
         }
         IUniswapV3Pool pool = IUniswapV3Pool(poolAddress);
         
@@ -392,7 +392,7 @@ contract LiquidityManagement is Script {
         }
         
         // 添加流动性
-        _addLiquidity(deployer, positionManager, wethAddress, testTokenAddress);
+        _addLiquidity(deployer, positionManager, wethAddress, pqusdAddress);
         
         // 停止广播
         vm.stopBroadcast();

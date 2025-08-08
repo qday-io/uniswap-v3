@@ -17,7 +17,7 @@ load_env() {
 
 # 检查环境变量
 check_env_vars() {
-    local required_vars=("PRIVATE_KEY" "WETH_ADDRESS" "TEST_TOKEN_ADDRESS" "SWAP_ROUTER_ADDRESS" "POSITION_MANAGER_ADDRESS" "FACTORY_ADDRESS")
+    local required_vars=("PRIVATE_KEY" "WETH_ADDRESS" "PQUSD_ADDRESS" "SWAP_ROUTER_ADDRESS" "POSITION_MANAGER_ADDRESS" "FACTORY_ADDRESS")
     
     for var in "${required_vars[@]}"; do
         if [ -z "${!var}" ]; then
@@ -36,8 +36,8 @@ show_help() {
     echo "  $0 [operation]"
     echo ""
     echo "操作选项:"
-    echo "  swap          - 执行 WETH -> TestToken 交换"
-    echo "  swap-reverse  - 执行 TestToken -> WETH 交换"
+    echo "  swap          - 执行 WETH -> PQUSD 交换"
+    echo "  swap-reverse  - 执行 PQUSD -> WETH 交换"
     echo "  add-liquidity - 添加流动性"
     echo "  balance       - 查询用户余额"
     echo "  pool-info     - 查询池信息"

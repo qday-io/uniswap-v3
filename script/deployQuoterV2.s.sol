@@ -81,7 +81,7 @@ contract DeployQuoterV2 is Script {
     function testQuoterV2() public {
         address quoterV2Address = vm.envAddress("QUOTER_V2_ADDRESS");
         address wethAddress = vm.envAddress("WETH_ADDRESS");
-        address testTokenAddress = vm.envAddress("TEST_TOKEN_ADDRESS");
+        address testTokenAddress = vm.envAddress("PQUSD_ADDRESS");
         
         if (quoterV2Address == address(0)) {
             console.log("Error: QUOTER_V2_ADDRESS not set in environment variables");
@@ -91,7 +91,7 @@ contract DeployQuoterV2 is Script {
         QuoterV2 quoterV2 = QuoterV2(quoterV2Address);
         
         console.log("=== Test QuoterV2 ===");
-        console.log("Testing quote for WETH -> TestToken swap");
+        console.log("Testing quote for WETH -> PQUSD swap");
         console.log("Amount in: 1 ETH (1000000000000000000 wei)");
         console.log("Fee tier: 3000 (0.3%)");
         
@@ -113,7 +113,7 @@ contract DeployQuoterV2 is Script {
             console.log("Quote successful!");
             console.log("Amount out (wei):");
             console.logUint(amountOut);
-            console.log("Amount out (tokens):");
+            console.log("Amount out (PQUSD):");
             console.logUint(amountOut / 10**18);
             console.log("Sqrt price after:");
             console.logUint(uint256(sqrtPriceX96After));

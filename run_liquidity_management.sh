@@ -17,7 +17,7 @@ load_env() {
 
 # 检查环境变量
 check_env_vars() {
-    local required_vars=("PRIVATE_KEY" "WETH_ADDRESS" "TEST_TOKEN_ADDRESS" "POSITION_MANAGER_ADDRESS" "FACTORY_ADDRESS")
+    local required_vars=("PRIVATE_KEY" "WETH_ADDRESS" "PQUSD_ADDRESS" "POSITION_MANAGER_ADDRESS" "FACTORY_ADDRESS")
     
     for var in "${required_vars[@]}"; do
         if [ -z "${!var}" ]; then

@@ -26,10 +26,10 @@ export RPC_URL="your_rpc_url"  # 可选，默认为 http://localhost:8545
 ### 使用运行脚本
 
 ```bash
-# 执行 WETH -> TestToken 交换
+# 执行 WETH -> PQUSD 交换
 ./run_user_operation.sh swap
 
-# 执行 TestToken -> WETH 交换
+# 执行 PQUSD -> WETH 交换
 ./run_user_operation.sh swap-reverse
 
 # 添加流动性
@@ -66,28 +66,24 @@ forge script script/useOperation.s.sol:UseOperation --sig "checkPoolInfo()" --rp
 
 ## 功能说明
 
-### 1. 代币交换 (swapTokens)
-- 执行 WETH -> TestToken 交换
+### 1. 代币交换 (swap)
+- 执行 WETH -> PQUSD 交换
 - 交换数量：0.01 ETH
-- 自动处理授权
-- 显示交换前后的余额
+- 自动设置授权
 
-### 2. 反向交换 (swapTokensReverse)
-- 执行 TestToken -> WETH 交换
-- 交换数量：50 TestToken
-- 自动处理授权
-- 显示交换前后的余额
+### 2. 反向交换 (swap-reverse)
+- 执行 PQUSD -> WETH 交换
+- 交换数量：50 PQUSD
+- 自动设置授权
 
-### 3. 添加流动性 (addUserLiquidity)
-- 为用户添加流动性
-- 添加数量：0.05 ETH + 50 TestToken
-- 使用全范围流动性
-- 显示添加前后的余额和流动性信息
+### 3. 添加流动性 (add-liquidity)
+- 添加 WETH/PQUSD 流动性
+- 添加数量：0.05 ETH + 50 PQUSD
+- 自动设置授权
 
-### 4. 查询余额 (checkUserBalance)
-- 显示用户的 WETH 和 TestToken 余额
-- 显示授权情况
-- 显示用户地址
+### 4. 余额查询 (balance)
+- 显示用户的 WETH 和 PQUSD 余额
+- 显示授权状态
 
 ### 5. 查询池信息 (checkPoolInfo)
 - 显示池的基本信息
@@ -100,11 +96,19 @@ forge script script/useOperation.s.sol:UseOperation --sig "checkPoolInfo()" --rp
 
 ### 交换数量
 ```solidity
-// WETH -> TestToken
-amountIn: 10000000000000000, // 0.01 ETH
+// WETH -> PQUSD
+swapRouter.exactInputSingle({
+    tokenIn: wethAddress,
+    tokenOut: pqusdAddress,
+    // ...
+});
 
-// TestToken -> WETH
-amountIn: 50000000000000000000, // 50 tokens
+// PQUSD -> WETH
+swapRouter.exactInputSingle({
+    tokenIn: pqusdAddress,
+    tokenOut: wethAddress,
+    // ...
+});
 ```
 
 ### 流动性添加
@@ -126,12 +130,12 @@ tickUpper: 887220,  // 全范围上限
 === 用户代币交换操作 ===
 交换前余额:
 WETH: 1000000000000000000
-TestToken: 1000000000000000000000
+PQUSD: 1000000000000000000000
 已设置 WETH 授权
-交换成功: WETH -> TestToken
+交换成功: WETH -> PQUSD
 交换后余额:
 WETH: 990000000000000000
-TestToken: 1000000000000000000000
+PQUSD: 1000000000000000000000
 ```
 
 ### 查询余额
@@ -139,12 +143,12 @@ TestToken: 1000000000000000000000
 === 用户余额查询 ===
 用户地址: 0x1234567890123456789012345678901234567890
 WETH 余额: 990000000000000000
-TestToken 余额: 1000000000000000000000
+PQUSD 余额: 1000000000000000000000
 授权情况:
 WETH -> SwapRouter: 115792089237316195423570985008687907853269984665640564039457584007913129639935
-TestToken -> SwapRouter: 0
+PQUSD -> SwapRouter: 0
 WETH -> PositionManager: 0
-TestToken -> PositionManager: 0
+PQUSD -> PositionManager: 0
 ```
 
 ### 查询池信息

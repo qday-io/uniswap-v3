@@ -1,6 +1,6 @@
 # Uniswap V3 Foundry 部署项目
 
-这是一个使用 Foundry 部署 Uniswap V3 的完整项目。项目包含了所有必要的合约部署脚本和工具。
+这是一个使用 Foundry 部署 Uniswap V3 的完整项目。项目包含了所有必要的合约部署脚本和工具，支持 WETH 和 PQUSD 代币。
 
 ## 🚀 快速开始
 
@@ -16,13 +16,28 @@ forge install
 forge build
 ```
 
-### 3. 检查 WETH 配置 (推荐)
+### 3. 配置环境变量
 ```bash
-# 检查 WETH 合约是否已部署
-./check_weth.sh
+# 复制示例文件
+cp env.example .env
+
+# 编辑 .env 文件
+nano .env
 ```
 
-### 4. 本地测试部署
+### 4. 部署 WETH 和 PQUSD
+```bash
+# 部署代币合约
+./deploy_weth_pqusd.sh
+```
+
+### 5. 检查合约配置
+```bash
+# 检查 WETH 和 PQUSD 合约
+./check_weth_pqusd.sh
+```
+
+### 6. 部署 Uniswap V3
 ```bash
 # 启动 Anvil 节点
 anvil
@@ -31,15 +46,16 @@ anvil
 ./deploy_step_by_step.sh
 ```
 
-### 4. 生产部署
+### 7. 部署 QuoterV2
 ```bash
-# 设置环境变量
-export PRIVATE_KEY=your_private_key_here
-export RPC_URL=https://sepolia.base.org
-export ETHERSCAN_API_KEY=your_etherscan_api_key_here
+# 部署 QuoterV2 合约
+./run_deploy_quoterV2.sh deploy
 
-# 运行生产部署
-./deploy-production.sh
+# 验证部署
+./run_deploy_quoterV2.sh verify
+
+# 测试功能
+./run_deploy_quoterV2.sh test
 ```
 
 ## 📁 项目结构
@@ -47,23 +63,45 @@ export ETHERSCAN_API_KEY=your_etherscan_api_key_here
 ```
 uniswapV3_foundry_deployment/
 ├── script/
-│   └── deployUniswapV3.s.sol    # 主要部署脚本
-├── src/                          # 自定义合约
+│   ├── deployQuoterV2.s.sol      # QuoterV2 部署脚本
+│   ├── liquidityManagement.s.sol  # 流动性管理脚本
+│   ├── useOperation.s.sol         # 用户操作脚本
+│   └── wethDeposit.s.sol         # WETH 存款脚本
+├── src/
+│   ├── WETH.sol                  # WETH 合约
+│   ├── PQUSD.sol                 # PQUSD 代币合约
+│   └── deployConstructor/        # 部署构造函数
 ├── lib/                          # 依赖库
-├── deploy.sh                     # 本地部署脚本
-├── deploy-production.sh          # 生产部署脚本
-├── DEPLOYMENT_GUIDE.md          # 详细部署指南
+├── deploy_weth_pqusd.sh         # WETH 和 PQUSD 部署脚本
+├── check_weth_pqusd.sh          # 合约配置检查脚本
+├── deploy_step_by_step.sh       # 完整部署脚本
+├── run_deploy_quoterV2.sh       # QuoterV2 部署脚本
+├── run_liquidity_management.sh   # 流动性管理脚本
+├── run_user_operation.sh         # 用户操作脚本
+├── QUICK_START.md               # 快速开始指南
 └── foundry.toml                 # Foundry 配置
 ```
 
 ## 🔧 部署的合约
 
-1. **UniswapV3Factory** - 工厂合约，用于创建流动性池
-2. **SwapRouter** - 交换路由器，用于执行代币交换
-3. **NonfungibleTokenPositionDescriptor** - NFT 位置描述符
-4. **NonfungiblePositionManager** - NFT 位置管理器
+### 代币合约
+1. **WETH** - Wrapped Ether 合约
+2. **PQUSD** - PQ USD 代币合约
+
+### Uniswap V3 核心合约
+3. **UniswapV3Factory** - 工厂合约，用于创建流动性池
+4. **SwapRouter** - 交换路由器，用于执行代币交换
+5. **NonfungibleTokenPositionDescriptor** - NFT 位置描述符
+6. **NonfungiblePositionManager** - NFT 位置管理器
+7. **QuoterV2** - 价格报价合约
 
 ## 🌐 支持的网络
+
+### 本地测试 (Anvil)
+- **RPC URL**: `http://localhost:8545`
+- **Chain ID**: 31337
+- **WETH**: 自动部署
+- **PQUSD**: 自动部署
 
 ### Base Sepolia 测试网
 - **WETH 地址**: `0x4200000000000000000000000000000000000006`
@@ -71,35 +109,97 @@ uniswapV3_foundry_deployment/
 - **Chain ID**: 84532
 
 ### 其他网络
-可以通过修改 `script/deployUniswapV3.s.sol` 中的 WETH 地址来支持其他网络。
+可以通过修改 `.env` 文件中的地址来支持其他网络。
 
 ## 📋 部署脚本
 
-### WETH 检查 (`check_weth.sh`)
-- 验证 WETH 合约是否存在
-- 测试 WETH 基本功能
-- 检查部署者 WETH 余额
-
-### 本地测试 (`deploy_step_by_step.sh`)
-- 使用 Anvil 本地节点
-- 自动检查 WETH 配置
-- 逐步部署所有合约
-
-### WETH 部署 (`deploy_weth.sh`)
-- 部署 WETH 合约到本地网络
+### 代币部署 (`deploy_weth_pqusd.sh`)
+- 部署 WETH 和 PQUSD 合约
 - 自动更新配置文件
 - 生成部署摘要
+
+### 合约检查 (`check_weth_pqusd.sh`)
+- 验证 WETH 和 PQUSD 合约
+- 测试合约基本功能
+- 检查部署者余额
+
+### 完整部署 (`deploy_step_by_step.sh`)
+- 使用 Anvil 本地节点
+- 自动检查合约配置
+- 逐步部署所有 Uniswap V3 合约
+
+### QuoterV2 部署 (`run_deploy_quoterV2.sh`)
+- 部署 QuoterV2 合约
+- 验证部署状态
+- 测试报价功能
+
+### 用户操作 (`run_user_operation.sh`)
+- 代币交换 (WETH ↔ PQUSD)
+- 添加流动性
+- 查询余额和池信息
+
+### 流动性管理 (`run_liquidity_management.sh`)
+- 添加流动性
+- 增加/减少流动性
+- 收集费用
+- 销毁位置
+
+## 🧪 测试功能
+
+部署完成后，您可以测试各种功能：
+
+```bash
+# 检查合约配置
+./check_weth_pqusd.sh
+
+# 测试用户操作
+./run_user_operation.sh balance
+./run_user_operation.sh swap
+./run_user_operation.sh add-liquidity
+
+# 测试流动性管理
+./run_liquidity_management.sh mint
+./run_liquidity_management.sh increase
+
+# 测试 QuoterV2
+./run_deploy_quoterV2.sh test
+```
 
 ## 🔍 验证部署
 
 部署完成后，您可以使用以下命令验证合约：
 
 ```bash
+# 检查代币合约
+cast call <WETH_ADDRESS> "name()" --rpc-url $RPC_URL
+cast call <PQUSD_ADDRESS> "name()" --rpc-url $RPC_URL
+
 # 检查工厂合约
 cast call <FACTORY_ADDRESS> "owner()" --rpc-url $RPC_URL
 
 # 检查路由器合约
 cast call <ROUTER_ADDRESS> "factory()" --rpc-url $RPC_URL
+
+# 检查 QuoterV2 合约
+cast call <QUOTER_V2_ADDRESS> "factory()" --rpc-url $RPC_URL
+```
+
+### 验证示例
+
+```bash
+# 使用项目中的 RPC URL
+export RPC_URL=http://13.54.171.239:8123
+
+# 验证 WETH 合约
+cast call 0x37Ed4cf559Ed4034040F4045045ff3Ff6f3ce5E5 "name()" --rpc-url $RPC_URL
+# 输出: Wrapped Ether
+
+# 验证 PQUSD 合约
+cast call 0x1984973E205CFBc454C7092d3aD051B54aB6663e "name()" --rpc-url $RPC_URL
+# 输出: PQ USD
+
+# 验证 Factory 合约
+cast call 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0 "owner()" --rpc-url $RPC_URL
 ```
 
 ## 🛠️ 环境要求
@@ -110,19 +210,14 @@ cast call <ROUTER_ADDRESS> "factory()" --rpc-url $RPC_URL
 
 ## 📚 文档
 
-- [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) - 详细部署指南
+- [QUICK_START.md](./QUICK_START.md) - 快速开始指南
+- [USER_OPERATION_USAGE.md](./USER_OPERATION_USAGE.md) - 用户操作指南
+- [SCRIPT_USAGE.md](./SCRIPT_USAGE.md) - 脚本使用说明
+- [STEP_BY_STEP_DEPLOYMENT.md](./STEP_BY_STEP_DEPLOYMENT.md) - 详细部署指南
 - [Foundry 文档](https://book.getfoundry.sh/)
 - [Uniswap V3 文档](https://docs.uniswap.org/)
 
-## 🤝 贡献
+## 参考
 
-欢迎提交 Issue 和 Pull Request！
-
-## 📄 许可证
-
-MIT License
-
-## ⚠️ 免责声明
-
-这是一个教育项目，请在生产环境中使用前进行充分测试。作者不对任何损失负责。 
+https://github.com/MarcusWentz/uniswapV3_foundry_deployment/blob/main/README.md
 
