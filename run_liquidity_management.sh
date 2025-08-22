@@ -36,12 +36,13 @@ show_help() {
     echo "  $0 [操作]"
     echo ""
     echo "操作选项:"
-    echo "  all              # 运行完整流程 (默认)"
+    echo "  all              # 运行完整流程"
     echo "  mint             # 仅添加流动性"
     echo "  increase         # 仅增加流动性"
     echo "  collect          # 仅收集费用"
     echo "  decrease         # 仅减少流动性"
     echo "  burn             # 仅销毁位置"
+    echo "  balance          # 查询余额和流动性状态"
     echo "  help, -h, --help # 显示此帮助信息"
     echo ""
     echo "功能说明:"
@@ -53,9 +54,9 @@ show_help() {
     echo "  5. 销毁位置 (burn)"
     echo ""
     echo "示例:"
-    echo "  $0              # 运行完整流程"
     echo "  $0 mint         # 仅添加流动性"
     echo "  $0 collect      # 仅收集费用"
+    echo "  $0 all          # 运行完整流程"
     echo "  $0 help         # 显示帮助信息"
 }
 
@@ -77,7 +78,47 @@ run_liquidity_management() {
             ;;
         "mint")
             echo "仅添加流动性..."
-            forge script script/liquidityManagement.s.sol:LiquidityManagement --sig "runMint()" --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --legacy
+            echo "执行 mint 操作，请等待..."
+            
+            # 执行 mint 操作并捕获输出
+            MINT_OUTPUT=$(forge script script/liquidityManagement.s.sol:LiquidityManagement --sig "runMint()" --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --legacy 2>&1)
+            MINT_EXIT_CODE=$?
+            
+            if [ $MINT_EXIT_CODE -eq 0 ]; then
+                echo "✅ Mint 操作执行成功"
+                
+                # 从输出中提取 CREATED_TOKEN_ID
+                TOKEN_ID=$(echo "$MINT_OUTPUT" | grep -A 2 "=== TOKEN_ID_FOR_ENV ===" | grep -v "=== TOKEN_ID_FOR_ENV ===" | grep -v "=== END_TOKEN_ID_FOR_ENV ===" | grep -v "^$" | head -1)
+                
+                if [ -n "$TOKEN_ID" ]; then
+                    echo "📝 提取到 TOKEN_ID: $TOKEN_ID"
+                    
+                    # 更新 .env 文件
+                    if [ -f ".env" ]; then
+                        # 如果已存在 CREATED_TOKEN_ID，则更新；否则添加
+                        if grep -q "CREATED_TOKEN_ID" .env; then
+                            sed -i '' "s/CREATED_TOKEN_ID=.*/CREATED_TOKEN_ID=$TOKEN_ID/" .env
+                            echo "✅ 已更新 .env 文件中的 CREATED_TOKEN_ID"
+                        else
+                            echo "CREATED_TOKEN_ID=$TOKEN_ID" >> .env
+                            echo "✅ 已在 .env 文件中添加 CREATED_TOKEN_ID"
+                        fi
+                    else
+                        echo "⚠️  未找到 .env 文件，无法更新 TOKEN_ID"
+                    fi
+                else
+                    echo "⚠️  未能从输出中提取 TOKEN_ID"
+                fi
+                
+                echo ""
+                echo "📋 Mint 操作输出:"
+                echo "$MINT_OUTPUT"
+            else
+                echo "❌ Mint 操作执行失败"
+                echo "错误输出:"
+                echo "$MINT_OUTPUT"
+                exit 1
+            fi
             ;;
         "increase")
             echo "仅增加流动性..."
@@ -94,6 +135,10 @@ run_liquidity_management() {
         "burn")
             echo "仅销毁位置..."
             forge script script/liquidityManagement.s.sol:LiquidityManagement --sig "runBurnPosition()" --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --legacy
+            ;;
+        "balance")
+            echo "查询余额和流动性状态..."
+            forge script script/liquidityManagement.s.sol:LiquidityManagement --sig "runQueryBalance()" --rpc-url $RPC_URL --private-key $PRIVATE_KEY
             ;;
         *)
             echo "错误: 未知操作 '$operation'"
@@ -119,13 +164,16 @@ main() {
     
     # 处理参数
     if [ $# -eq 0 ]; then
-        run_liquidity_management "all"
+        echo "错误: 请指定要执行的操作"
+        echo ""
+        show_help
+        exit 1
     else
         case $1 in
             "help"|"-h"|"--help")
                 show_help
                 ;;
-            "all"|"mint"|"increase"|"collect"|"decrease"|"burn")
+            "all"|"mint"|"increase"|"collect"|"decrease"|"burn"|"balance")
                 run_liquidity_management "$1"
                 ;;
             *)

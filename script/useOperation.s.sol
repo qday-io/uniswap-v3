@@ -173,97 +173,7 @@ contract UseOperation is Script {
         console.logUint(pqusdDifference / 10**18);
     }
     
-    // 用户操作：添加流动性
-    function addUserLiquidity() public {
-        address user = vm.addr(vm.envUint("PRIVATE_KEY"));
-        
-        // 从环境变量读取合约地址
-        address payable wethAddress = payable(vm.envAddress("WETH_ADDRESS"));
-        address payable pqusdAddress = payable(vm.envAddress("PQUSD_ADDRESS"));
-        address payable positionManagerAddress = payable(vm.envAddress("POSITION_MANAGER_ADDRESS"));
-        
-        INonfungiblePositionManager positionManager = INonfungiblePositionManager(positionManagerAddress);
-        
-        console.log("=== User Add Liquidity Operation ===");
-        
-        // 检查用户余额
-        uint256 wethBalance = IERC20(wethAddress).balanceOf(user);
-        uint256 pqusdBalance = IERC20(pqusdAddress).balanceOf(user);
-        
-        console.log("Balance before adding liquidity:");
-        console.log("WETH:");
-        console.logUint(wethBalance);
-        console.log("PQUSD:");
-        console.logUint(pqusdBalance);
-        
-        // 开始广播交易
-        vm.startBroadcast(user);
-        
-        // 确保有足够的授权
-        if (IERC20(wethAddress).allowance(user, positionManagerAddress) < 100000000000000000000) { // 100 ETH
-            IERC20(wethAddress).approve(positionManagerAddress, type(uint256).max);
-            console.log("WETH approval set for PositionManager");
-        }
-        
-        if (IERC20(pqusdAddress).allowance(user, positionManagerAddress) < 100000000000000000000000) { // 100000 tokens
-            IERC20(pqusdAddress).approve(positionManagerAddress, type(uint256).max);
-            console.log("PQUSD approval set for PositionManager");
-        }
-        
-        // 添加流动性
-        (uint256 tokenId, uint128 liquidity, uint256 amount0, uint256 amount1) = positionManager.mint(
-            INonfungiblePositionManager.MintParams({
-                token0: wethAddress < pqusdAddress ? wethAddress : pqusdAddress,
-                token1: wethAddress < pqusdAddress ? pqusdAddress : wethAddress,
-                fee: 3000,
-                tickLower: -887220,
-                tickUpper: 887220,
-                amount0Desired: 10000000000000000, // 0.01 ETH
-                amount1Desired: 10000000000000000000, // 10 tokens
-                amount0Min: 0,
-                amount1Min: 0,
-                recipient: user,
-                deadline: block.timestamp + 7200
-            })
-        );
-        
-        // 停止广播
-        vm.stopBroadcast();
-        
-        console.log("Liquidity added successfully!");
-        console.log("TokenId:");
-        console.logUint(tokenId);
-        console.log("Liquidity amount:");
-        console.logUint(liquidity);
-        console.log("Token0 used:");
-        console.logUint(amount0);
-        console.log("Token1 used:");
-        console.logUint(amount1);
-        
-        // 显示添加后的余额
-        uint256 newWethBalance = IERC20(wethAddress).balanceOf(user);
-        uint256 newPqusdBalance = IERC20(pqusdAddress).balanceOf(user);
-        
-        console.log("Balance after adding liquidity:");
-        console.log("WETH:");
-        console.logUint(newWethBalance);
-        console.log("PQUSD:");
-        console.logUint(newPqusdBalance);
-        
-        // 计算并显示差额
-        uint256 wethDifference = wethBalance - newWethBalance;
-        uint256 pqusdDifference = pqusdBalance - newPqusdBalance;
-        
-        console.log("=== Balance Changes ===");
-        console.log("WETH used (wei):");
-        console.logUint(wethDifference);
-        console.log("WETH used (ETH):");
-        console.logUint(wethDifference / 10**18);
-        console.log("PQUSD used (wei):");
-        console.logUint(pqusdDifference);
-        console.log("PQUSD used (tokens):");
-        console.logUint(pqusdDifference / 10**18);
-    }
+
     
     // 用户操作：查询余额
     function checkUserBalance() public {
@@ -274,7 +184,8 @@ contract UseOperation is Script {
         address payable pqusdAddress = payable(vm.envAddress("PQUSD_ADDRESS"));
         
         console.log("=== User Balance Query ===");
-        console.log("User address:", user);
+        console.log("User address:");
+        console.logAddress(user);
         
         uint256 wethBalance = IERC20(wethAddress).balanceOf(user);
         uint256 pqusdBalance = IERC20(pqusdAddress).balanceOf(user);
@@ -282,18 +193,10 @@ contract UseOperation is Script {
         // 显示人类可读的余额格式
         console.log("=== Token Balances ===");
         console.log("WETH balance:");
-        // console.log("  Raw (wei):");
-        // console.logUint(wethBalance);
-        // console.log("  Human readable:");
         console.logUint(wethBalance / 10**18);
         
         console.log("PQUSD balance:");
-        // console.log("  Raw (wei):");
-        // console.logUint(pqusdBalance);
-        // console.log("  Human readable:");
         console.logUint(pqusdBalance / 10**18);
-        // console.log("  Decimals:");
-        // console.logUint(pqusdBalance % 10**18);
         
         // 显示授权情况
         address payable swapRouterAddress = payable(vm.envAddress("SWAP_ROUTER_ADDRESS"));
@@ -363,7 +266,8 @@ contract UseOperation is Script {
             return;
         }
         
-        console.log("Pool address:", poolAddress);
+        console.log("Pool address:");
+        console.logAddress(poolAddress);
         
         IUniswapV3Pool pool = IUniswapV3Pool(poolAddress);
         
@@ -373,7 +277,7 @@ contract UseOperation is Script {
         console.log("Current sqrt price:");
         console.logUint(sqrtPriceX96);
         console.log("Current tick:");
-        console.logUint(uint256(int256(tick)));
+        console.logInt(tick);
         
         // 获取流动性信息
         uint128 liquidity = pool.liquidity();
@@ -388,8 +292,81 @@ contract UseOperation is Script {
         // 获取代币地址
         address token0 = pool.token0();
         address token1 = pool.token1();
-        console.log("Token0:", token0);
-        console.log("Token1:", token1);
+        console.log("Token0:");
+        console.logAddress(token0);
+        console.log("Token1:");
+        console.logAddress(token1);
+    }
+    
+    // 用户操作：查询流动性状态
+    function checkLiquidityStatus() public {
+        address user = vm.addr(vm.envUint("PRIVATE_KEY"));
+        
+        console.log("=== User Liquidity Status ===");
+        console.log("User address:");
+        console.logAddress(user);
+        
+        // 查询流动性状态（如果有 tokenId）
+        uint256 tokenId = vm.envUint("CREATED_TOKEN_ID");
+        if (tokenId > 0) {
+            console.log("=== Liquidity Position Status ===");
+            console.log("Token ID:");
+            console.logUint(tokenId);
+            
+            address positionManagerAddress = vm.envAddress("POSITION_MANAGER_ADDRESS");
+            INonfungiblePositionManager positionManager = INonfungiblePositionManager(positionManagerAddress);
+            
+            try positionManager.positions(tokenId) returns (
+                uint96 nonce,
+                address operator,
+                address token0,
+                address token1,
+                uint24 fee,
+                int24 tickLower,
+                int24 tickUpper,
+                uint128 liquidity,
+                uint256 feeGrowthInside0LastX128,
+                uint256 feeGrowthInside1LastX128,
+                uint128 tokensOwed0,
+                uint128 tokensOwed1
+            ) {
+                console.log("Position Details:");
+                console.log("  Token0:");
+                console.logAddress(token0);
+                console.log("  Token1:");
+                console.logAddress(token1);
+                console.log("  Fee Tier:");
+                console.logUint(fee);
+                console.log("  Tick Lower:");
+                console.logInt(tickLower);
+                console.log("  Tick Upper:");
+                console.logInt(tickUpper);
+                console.log("  Current Liquidity:");
+                console.logUint(liquidity);
+                console.log("  Tokens Owed 0:");
+                console.logUint(tokensOwed0);
+                console.log("  Tokens Owed 1:");
+                console.logUint(tokensOwed1);
+                
+                // 计算可收集的费用
+                if (tokensOwed0 > 0 || tokensOwed1 > 0) {
+                    console.log("=== Collectable Fees ===");
+                    console.log("  Token0 fees:");
+                    console.logUint(tokensOwed0);
+                    console.log("  wei");
+                    console.log("  Token1 fees:");
+                    console.logUint(tokensOwed1);
+                    console.log("  wei");
+                } else {
+                    console.log("No collectable fees at the moment");
+                }
+            } catch {
+                console.log("Error: Could not retrieve position details for tokenId:");
+                console.logUint(tokenId);
+            }
+        } else {
+            console.log("No liquidity position found (CREATED_TOKEN_ID not set)");
+        }
     }
     
     // 默认运行函数 - 执行用户交换操作

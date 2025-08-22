@@ -165,6 +165,44 @@ uniswapV3_foundry_deployment/
 ./run_deploy_quoterV2.sh test
 ```
 
+## 📡 事件监听
+
+项目提供了完整的事件监听和解码功能：
+
+### 基础事件监听
+```bash
+# 监听 Pool 事件
+./run_event_monitor.sh pool-events [pool_address]
+
+# 监听 Factory 事件
+./run_event_monitor.sh factory-events [factory_address]
+
+# 监听 Position Manager 事件
+./run_event_monitor.sh position-events [position_manager_address]
+
+# 监听所有事件
+./run_event_monitor.sh all-events
+```
+
+### 实时事件监听
+```bash
+# 实时监听 Pool 事件
+./run_realtime_monitor.sh pool-follow [pool_address]
+
+# 实时监听所有事件
+./run_realtime_monitor.sh all-follow
+
+# 解码日志文件
+./run_realtime_monitor.sh decode-logs events.log
+```
+
+### 支持的事件类型
+- **Pool 事件**: Initialize, Mint, Burn, Swap, Collect, Flash
+- **Factory 事件**: PoolCreated, OwnerChanged
+- **Position Manager 事件**: IncreaseLiquidity, DecreaseLiquidity, Collect
+
+详细使用说明请参考 [EVENT_MONITOR_USAGE.md](./EVENT_MONITOR_USAGE.md)
+
 ## 🔍 验证部署
 
 部署完成后，您可以使用以下命令验证合约：
@@ -214,6 +252,7 @@ cast call 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0 "owner()" --rpc-url $RPC_UR
 - [USER_OPERATION_USAGE.md](./USER_OPERATION_USAGE.md) - 用户操作指南
 - [SCRIPT_USAGE.md](./SCRIPT_USAGE.md) - 脚本使用说明
 - [STEP_BY_STEP_DEPLOYMENT.md](./STEP_BY_STEP_DEPLOYMENT.md) - 详细部署指南
+- [EVENT_MONITOR_USAGE.md](./EVENT_MONITOR_USAGE.md) - 事件监听和解码指南
 - [Foundry 文档](https://book.getfoundry.sh/)
 - [Uniswap V3 文档](https://docs.uniswap.org/)
 

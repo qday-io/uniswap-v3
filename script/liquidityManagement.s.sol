@@ -121,6 +121,12 @@ contract LiquidityManagement is Script {
         
         createdTokenId = tokenId;
         
+        // 输出 tokenId 信息，供脚本捕获并写入 .env 文件
+        console.log("=== TOKEN_ID_FOR_ENV ===");
+        console.log("CREATED_TOKEN_ID=");
+        console.logUint(tokenId);
+        console.log("=== END_TOKEN_ID_FOR_ENV ===");
+        
         console.log("=== Liquidity Added Successfully ===");
         console.log("TokenId:");
         console.logUint(tokenId);
@@ -166,10 +172,24 @@ contract LiquidityManagement is Script {
         address wethAddress,
         address pqusdAddress
     ) internal {
+        _increaseLiquidityWithTokenId(deployer, positionManager, wethAddress, pqusdAddress, createdTokenId);
+    }
+    
+    function _increaseLiquidityWithTokenId(
+        address deployer,
+        INonfungiblePositionManager positionManager,
+        address wethAddress,
+        address pqusdAddress,
+        uint256 tokenId
+    ) internal {
         console.log("=== Increase Liquidity ===");
         
+        // 获取增加流动性前的余额
+        uint256 wethBalanceBefore = IERC20(wethAddress).balanceOf(deployer);
+        uint256 pqusdBalanceBefore = IERC20(pqusdAddress).balanceOf(deployer);
+        
         // 获取位置信息
-        (,,,,,,,uint128 currentLiquidity,,,,) = positionManager.positions(createdTokenId);
+        (,,,,,,,uint128 currentLiquidity,,,,) = positionManager.positions(tokenId);
         
         console.log("Current liquidity:");
         console.logUint(currentLiquidity);
@@ -177,7 +197,7 @@ contract LiquidityManagement is Script {
         // 增加流动性
         (uint128 newLiquidity, uint256 amount0, uint256 amount1) = positionManager.increaseLiquidity(
             INonfungiblePositionManager.IncreaseLiquidityParams({
-                tokenId: createdTokenId,
+                tokenId: tokenId,
                 amount0Desired: 50000000000000000, // 0.05 ETH
                 amount1Desired: 50000000000000000000, // 50 tokens
                 amount0Min: 0,
@@ -195,32 +215,39 @@ contract LiquidityManagement is Script {
         console.logUint(amount1);
         
         // 显示增加后的总流动性
-        (,,,,,,,uint128 totalLiquidity,,,,) = positionManager.positions(createdTokenId);
-        
-        console.log("=== Total Liquidity After Increase ===");
+        (,,,,,,,uint128 totalLiquidity,,,,) = positionManager.positions(tokenId);
         console.log("Total liquidity:");
         console.logUint(totalLiquidity);
         
-        // 计算并显示流动性增加量
-        uint128 liquidityIncrease = totalLiquidity - currentLiquidity;
+        // 收集可能返回的代币
+        _collectReturnedTokens(positionManager, tokenId, deployer);
         
-        console.log("=== Liquidity Changes ===");
-        console.log("Liquidity increase:");
-        console.logUint(liquidityIncrease);
-        console.log("Previous liquidity:");
-        console.logUint(currentLiquidity);
-        console.log("New total liquidity:");
-        console.logUint(totalLiquidity);
+        // 获取增加流动性并收集代币后的余额并显示变化
+        _logBalanceChanges(deployer, wethAddress, pqusdAddress, wethBalanceBefore, pqusdBalanceBefore, "Increasing Liquidity");
     }
     
     function _collectFees(
         address deployer,
         INonfungiblePositionManager positionManager
     ) internal {
+        _collectFeesWithTokenId(deployer, positionManager, createdTokenId);
+    }
+    
+    function _collectFeesWithTokenId(
+        address deployer,
+        INonfungiblePositionManager positionManager,
+        uint256 tokenId
+    ) internal {
         console.log("=== Collect Fees ===");
         
+        // 获取收集费用前的余额
+        address wethAddress = vm.envAddress("WETH_ADDRESS");
+        address pqusdAddress = vm.envAddress("PQUSD_ADDRESS");
+        uint256 wethBalanceBefore = IERC20(wethAddress).balanceOf(deployer);
+        uint256 pqusdBalanceBefore = IERC20(pqusdAddress).balanceOf(deployer);
+        
         // 获取当前欠款
-        (,,,,,,,,,,uint128 tokensOwed0,uint128 tokensOwed1) = positionManager.positions(createdTokenId);
+        (,,,,,,,,,,uint128 tokensOwed0,uint128 tokensOwed1) = positionManager.positions(tokenId);
         
         console.log("Current fees owed:");
         console.log("  Token0 owed (wei):");
@@ -231,7 +258,7 @@ contract LiquidityManagement is Script {
         // 收集费用
         (uint256 amount0, uint256 amount1) = positionManager.collect(
             INonfungiblePositionManager.CollectParams({
-                tokenId: createdTokenId,
+                tokenId: tokenId,
                 recipient: deployer,
                 amount0Max: type(uint128).max,
                 amount1Max: type(uint128).max
@@ -243,29 +270,63 @@ contract LiquidityManagement is Script {
         console.logUint(amount0);
         console.log("Token1 collected (wei):");
         console.logUint(amount1);
+        
+        // 获取收集费用后的余额
+        uint256 wethBalanceAfter = IERC20(wethAddress).balanceOf(deployer);
+        uint256 pqusdBalanceAfter = IERC20(pqusdAddress).balanceOf(deployer);
+        
+        console.log("=== Balance After Collecting Fees ===");
+        console.log("  WETH (wei):");
+        console.logUint(wethBalanceAfter);
+        console.log("  WETH (ETH):");
+        console.logUint(wethBalanceAfter / 1e18);
+        console.log("  PQUSD (wei):");
+        console.logUint(pqusdBalanceAfter);
+        console.log("  PQUSD (tokens):");
+        console.logUint(pqusdBalanceAfter / 1e18);
+        
+        console.log("=== Balance Changes ===");
+        console.log("  WETH gained (wei):");
+        console.logInt(int256(wethBalanceAfter) - int256(wethBalanceBefore));
+        console.log("  WETH gained (ETH):");
+        console.logInt((int256(wethBalanceAfter) - int256(wethBalanceBefore)) / 1e18);
+        console.log("  PQUSD gained (wei):");
+        console.logInt(int256(pqusdBalanceAfter) - int256(pqusdBalanceBefore));
+        console.log("  PQUSD gained (tokens):");
+        console.logInt((int256(pqusdBalanceAfter) - int256(pqusdBalanceBefore)) / 1e18);
     }
     
     function _decreaseLiquidity(
         address deployer,
         INonfungiblePositionManager positionManager
     ) internal {
+        _decreaseLiquidityWithTokenId(deployer, positionManager, createdTokenId);
+    }
+    
+    function _decreaseLiquidityWithTokenId(
+        address deployer,
+        INonfungiblePositionManager positionManager,
+        uint256 tokenId
+    ) internal {
         console.log("=== Decrease Liquidity ===");
         
-        // 获取当前流动性
-        (,,,,,,,uint128 currentLiquidity,,,,) = positionManager.positions(createdTokenId);
+        // 获取减少流动性前的余额
+        address wethAddress = vm.envAddress("WETH_ADDRESS");
+        address pqusdAddress = vm.envAddress("PQUSD_ADDRESS");
+        uint256 wethBalanceBefore = IERC20(wethAddress).balanceOf(deployer);
+        uint256 pqusdBalanceBefore = IERC20(pqusdAddress).balanceOf(deployer);
         
-        console.log("Current liquidity:");
-        console.logUint(currentLiquidity);
+        // 获取当前流动性
+        (,,,,,,,uint128 currentLiquidity,,,,) = positionManager.positions(tokenId);
         
         // 减少一半流动性
         uint128 decreaseAmount = currentLiquidity / 2;
-        
         console.log("Decreasing liquidity by:");
         console.logUint(decreaseAmount);
         
         (uint256 amount0, uint256 amount1) = positionManager.decreaseLiquidity(
             INonfungiblePositionManager.DecreaseLiquidityParams({
-                tokenId: createdTokenId,
+                tokenId: tokenId,
                 liquidity: decreaseAmount,
                 amount0Min: 0,
                 amount1Min: 0,
@@ -274,45 +335,44 @@ contract LiquidityManagement is Script {
         );
         
         console.log("=== Liquidity Decreased Successfully ===");
-        console.log("Decreased liquidity:");
-        console.logUint(decreaseAmount);
         console.log("Token0 returned (wei):");
         console.logUint(amount0);
-        console.log("Token1 returned (wei):");
+        console.log("Token1 used (wei):");
         console.logUint(amount1);
         
         // 显示减少后的流动性
-        (,,,,,,,uint128 remainingLiquidity,,,,) = positionManager.positions(createdTokenId);
-        
-        console.log("=== Remaining Liquidity ===");
+        (,,,,,,,uint128 remainingLiquidity,,,,) = positionManager.positions(tokenId);
         console.log("Remaining liquidity:");
         console.logUint(remainingLiquidity);
         
-        // 计算并显示流动性减少量
-        uint128 liquidityDecrease = currentLiquidity - remainingLiquidity;
+        // 收集返回的代币
+        _collectReturnedTokens(positionManager, tokenId, deployer);
         
-        console.log("=== Liquidity Changes ===");
-        console.log("Liquidity decrease:");
-        console.logUint(liquidityDecrease);
-        console.log("Previous liquidity:");
-        console.logUint(currentLiquidity);
-        console.log("Remaining liquidity:");
-        console.logUint(remainingLiquidity);
+        // 获取减少流动性并收集代币后的余额并显示变化
+        _logBalanceChanges(deployer, wethAddress, pqusdAddress, wethBalanceBefore, pqusdBalanceBefore, "Decreasing Liquidity");
     }
     
     function _burnPosition(
         address deployer,
         INonfungiblePositionManager positionManager
     ) internal {
+        _burnPositionWithTokenId(deployer, positionManager, createdTokenId);
+    }
+    
+    function _burnPositionWithTokenId(
+        address deployer,
+        INonfungiblePositionManager positionManager,
+        uint256 tokenId
+    ) internal {
         console.log("=== Burn Position ===");
         console.log("TokenId to burn:");
-        console.logUint(createdTokenId);
+        console.logUint(tokenId);
         
         // 首先收集所有剩余费用
         console.log("Collecting remaining fees...");
         positionManager.collect(
             INonfungiblePositionManager.CollectParams({
-                tokenId: createdTokenId,
+                tokenId: tokenId,
                 recipient: deployer,
                 amount0Max: type(uint128).max,
                 amount1Max: type(uint128).max
@@ -320,7 +380,7 @@ contract LiquidityManagement is Script {
         );
         
         // 减少所有剩余流动性
-        (,,,,,,,uint128 remainingLiquidity,,,,) = positionManager.positions(createdTokenId);
+        (,,,,,,,uint128 remainingLiquidity,,,,) = positionManager.positions(tokenId);
         
         console.log("Remaining liquidity before burn:");
         console.logUint(remainingLiquidity);
@@ -329,7 +389,7 @@ contract LiquidityManagement is Script {
             console.log("Decreasing remaining liquidity...");
             positionManager.decreaseLiquidity(
                 INonfungiblePositionManager.DecreaseLiquidityParams({
-                    tokenId: createdTokenId,
+                    tokenId: tokenId,
                     liquidity: remainingLiquidity,
                     amount0Min: 0,
                     amount1Min: 0,
@@ -342,7 +402,7 @@ contract LiquidityManagement is Script {
         console.log("Collecting final fees...");
         positionManager.collect(
             INonfungiblePositionManager.CollectParams({
-                tokenId: createdTokenId,
+                tokenId: tokenId,
                 recipient: deployer,
                 amount0Max: type(uint128).max,
                 amount1Max: type(uint128).max
@@ -351,11 +411,11 @@ contract LiquidityManagement is Script {
         
         // 销毁位置
         console.log("Burning position...");
-        positionManager.burn(createdTokenId);
+        positionManager.burn(tokenId);
         
         console.log("=== Position Burned Successfully ===");
         console.log("TokenId burned:");
-        console.logUint(createdTokenId);
+        console.logUint(tokenId);
     }
     
     // 仅添加流动性
@@ -372,11 +432,11 @@ contract LiquidityManagement is Script {
         IUniswapV3Factory factory = IUniswapV3Factory(factoryAddress);
         INonfungiblePositionManager positionManager = INonfungiblePositionManager(positionManagerAddress);
         
-        // 确保有足够的授权
-        _ensureAllowances(deployer, wethAddress, pqusdAddress, positionManagerAddress);
-        
         // 开始广播交易
         vm.startBroadcast(deployer);
+        
+        // 确保有足够的授权（在广播模式下执行）
+        _ensureAllowances(deployer, wethAddress, pqusdAddress, positionManagerAddress);
         
         // 确保池存在并已初始化
         address poolAddress = factory.getPool(wethAddress, pqusdAddress, 3000);
@@ -408,14 +468,27 @@ contract LiquidityManagement is Script {
         // 获取合约实例
         INonfungiblePositionManager positionManager = INonfungiblePositionManager(positionManagerAddress);
         
-        // 查找可用的 tokenId (这里使用 2，因为我们已经创建了 tokenId 1 和 2)
-        createdTokenId = 2;
+        // 从环境变量读取 tokenId
+        uint256 tokenId = vm.envUint("CREATED_TOKEN_ID");
+        if (tokenId == 0) {
+            console.log("Error: CREATED_TOKEN_ID not set in environment, please run mint first");
+            return;
+        }
+        
+        console.log("Using tokenId from env:", tokenId);
         
         // 开始广播交易
         vm.startBroadcast(deployer);
         
+        // 从环境变量读取代币地址
+        address wethAddress = vm.envAddress("WETH_ADDRESS");
+        address pqusdAddress = vm.envAddress("PQUSD_ADDRESS");
+        
+        // 确保有足够的授权
+        _ensureAllowances(deployer, wethAddress, pqusdAddress, positionManagerAddress);
+        
         // 增加流动性
-        _increaseLiquidity(deployer, positionManager, address(0), address(0));
+        _increaseLiquidityWithTokenId(deployer, positionManager, wethAddress, pqusdAddress, tokenId);
         
         // 停止广播
         vm.stopBroadcast();
@@ -431,14 +504,20 @@ contract LiquidityManagement is Script {
         // 获取合约实例
         INonfungiblePositionManager positionManager = INonfungiblePositionManager(positionManagerAddress);
         
-        // 查找可用的 tokenId (这里使用 2，因为我们已经创建了 tokenId 1 和 2)
-        createdTokenId = 2;
+        // 从环境变量读取 tokenId
+        uint256 tokenId = vm.envUint("CREATED_TOKEN_ID");
+        if (tokenId == 0) {
+            console.log("Error: CREATED_TOKEN_ID not set in environment, please run mint first");
+            return;
+        }
+        
+        console.log("Using tokenId from env:", tokenId);
         
         // 开始广播交易
         vm.startBroadcast(deployer);
         
         // 收集费用
-        _collectFees(deployer, positionManager);
+        _collectFeesWithTokenId(deployer, positionManager, tokenId);
         
         // 停止广播
         vm.stopBroadcast();
@@ -454,14 +533,20 @@ contract LiquidityManagement is Script {
         // 获取合约实例
         INonfungiblePositionManager positionManager = INonfungiblePositionManager(positionManagerAddress);
         
-        // 查找可用的 tokenId (这里使用 2，因为我们已经创建了 tokenId 1 和 2)
-        createdTokenId = 2;
+        // 从环境变量读取 tokenId
+        uint256 tokenId = vm.envUint("CREATED_TOKEN_ID");
+        if (tokenId == 0) {
+            console.log("Error: CREATED_TOKEN_ID not set in environment, please run mint first");
+            return;
+        }
+        
+        console.log("Using tokenId from env:", tokenId);
         
         // 开始广播交易
         vm.startBroadcast(deployer);
         
         // 减少流动性
-        _decreaseLiquidity(deployer, positionManager);
+        _decreaseLiquidityWithTokenId(deployer, positionManager, tokenId);
         
         // 停止广播
         vm.stopBroadcast();
@@ -477,17 +562,165 @@ contract LiquidityManagement is Script {
         // 获取合约实例
         INonfungiblePositionManager positionManager = INonfungiblePositionManager(positionManagerAddress);
         
-        // 查找可用的 tokenId (这里使用 2，因为我们已经创建了 tokenId 1 和 2)
-        createdTokenId = 2;
+        // 从环境变量读取 tokenId
+        uint256 tokenId = vm.envUint("CREATED_TOKEN_ID");
+        if (tokenId == 0) {
+            console.log("Error: CREATED_TOKEN_ID not set in environment, please run mint first");
+            return;
+        }
+        
+        console.log("Using tokenId from env:", tokenId);
         
         // 开始广播交易
         vm.startBroadcast(deployer);
         
         // 销毁位置
-        _burnPosition(deployer, positionManager);
+        _burnPositionWithTokenId(deployer, positionManager, tokenId);
         
         // 停止广播
         vm.stopBroadcast();
+    }
+    
+    // 查询余额和流动性状态
+    function runQueryBalance() public {
+        address deployer = vm.addr(vm.envUint("PRIVATE_KEY"));
+        
+        // 从环境变量读取代币地址
+        address wethAddress = vm.envAddress("WETH_ADDRESS");
+        address pqusdAddress = vm.envAddress("PQUSD_ADDRESS");
+        
+        console.log("=== Balance and Liquidity Status ===");
+        console.log("User Address:");
+        console.logAddress(deployer);
+        
+        // 查询代币余额
+        uint256 wethBalance = IERC20(wethAddress).balanceOf(deployer);
+        uint256 pqusdBalance = IERC20(pqusdAddress).balanceOf(deployer);
+        
+        console.log("=== Token Balances ===");
+        console.log("WETH Balance:");
+        console.log("  Wei:");
+        console.logUint(wethBalance);
+        console.log("  ETH:");
+        console.logUint(wethBalance / 1e18);
+        console.log("PQUSD Balance:");
+        console.log("  Wei:");
+        console.logUint(pqusdBalance);
+        console.log("  Tokens:");
+        console.logUint(pqusdBalance / 1e18);
+        
+        // 查询流动性状态（如果有 tokenId）
+        uint256 tokenId = vm.envUint("CREATED_TOKEN_ID");
+        if (tokenId > 0) {
+            console.log("=== Liquidity Position Status ===");
+            console.log("Token ID:");
+            console.logUint(tokenId);
+            
+            address positionManagerAddress = vm.envAddress("POSITION_MANAGER_ADDRESS");
+            INonfungiblePositionManager positionManager = INonfungiblePositionManager(positionManagerAddress);
+            
+            try positionManager.positions(tokenId) returns (
+                uint96 nonce,
+                address operator,
+                address token0,
+                address token1,
+                uint24 fee,
+                int24 tickLower,
+                int24 tickUpper,
+                uint128 liquidity,
+                uint256 feeGrowthInside0LastX128,
+                uint256 feeGrowthInside1LastX128,
+                uint128 tokensOwed0,
+                uint128 tokensOwed1
+            ) {
+                console.log("Position Details:");
+                console.log("  Token0:");
+                console.logAddress(token0);
+                console.log("  Token1:");
+                console.logAddress(token1);
+                console.log("  Fee Tier:");
+                console.logUint(fee);
+                console.log("  Tick Lower:");
+                console.logInt(tickLower);
+                console.log("  Tick Upper:");
+                console.logInt(tickUpper);
+                console.log("  Current Liquidity:");
+                console.logUint(liquidity);
+                console.log("  Tokens Owed 0:");
+                console.logUint(tokensOwed0);
+                console.log("  Tokens Owed 1:");
+                console.logUint(tokensOwed1);
+                
+                // 计算可收集的费用
+                if (tokensOwed0 > 0 || tokensOwed1 > 0) {
+                    console.log("=== Collectable Fees ===");
+                    console.log("  Token0 fees:");
+                    console.logUint(tokensOwed0);
+                    console.log("  wei");
+                    console.log("  Token1 fees:");
+                    console.logUint(tokensOwed1);
+                    console.log("  wei");
+                } else {
+                    console.log("No collectable fees at the moment");
+                }
+            } catch {
+                console.log("Error: Could not retrieve position details for tokenId:");
+                console.logUint(tokenId);
+            }
+        } else {
+            console.log("No liquidity position found (CREATED_TOKEN_ID not set)");
+        }
+    }
+    
+    // 辅助函数：收集返回的代币
+    function _collectReturnedTokens(
+        INonfungiblePositionManager positionManager,
+        uint256 tokenId,
+        address deployer
+    ) internal {
+        console.log("Collecting returned tokens...");
+        positionManager.collect(
+            INonfungiblePositionManager.CollectParams({
+                tokenId: tokenId,
+                recipient: deployer,
+                amount0Max: type(uint128).max,
+                amount1Max: type(uint128).max
+            })
+        );
+    }
+    
+    // 辅助函数：记录余额变化
+    function _logBalanceChanges(
+        address deployer,
+        address wethAddress,
+        address pqusdAddress,
+        uint256 wethBalanceBefore,
+        uint256 pqusdBalanceBefore,
+        string memory operation
+    ) internal {
+        // 获取操作后的余额
+        uint256 wethBalanceAfter = IERC20(wethAddress).balanceOf(deployer);
+        uint256 pqusdBalanceAfter = IERC20(pqusdAddress).balanceOf(deployer);
+        
+        console.log("=== Balance After ", operation, " ===");
+        console.log("  WETH (wei):");
+        console.logUint(wethBalanceAfter);
+        console.log("  WETH (ETH):");
+        console.logUint(wethBalanceAfter / 1e18);
+        console.log("  PQUSD (wei):");
+        console.logUint(pqusdBalanceAfter);
+        console.log("  PQUSD (tokens):");
+        console.logUint(pqusdBalanceAfter / 1e18);
+        
+        console.log("=== Balance Changes ===");
+        console.log("  WETH gained (wei):");
+        console.logInt(int256(wethBalanceAfter) - int256(wethBalanceBefore));
+        console.log("  WETH gained (ETH):");
+        console.logInt((int256(wethBalanceAfter) - int256(wethBalanceBefore)) / 1e18);
+        console.log("  PQUSD gained (wei):");
+        console.logInt(int256(pqusdBalanceAfter) - int256(pqusdBalanceBefore));
+        console.log("  PQUSD gained (tokens):");
+        console.logInt((int256(pqusdBalanceAfter) - int256(pqusdBalanceBefore)) / 1e18);
     }
     
 } 

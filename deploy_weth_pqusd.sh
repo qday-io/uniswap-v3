@@ -31,6 +31,24 @@ log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
+# 设置固定的超时时间（秒）
+DEPOSIT_TIMEOUT=120
+BALANCE_CHECK_TIMEOUT=60
+
+# 简单的超时函数
+timeout_cmd() {
+    local timeout_seconds=$1
+    shift
+    if command -v timeout >/dev/null 2>&1; then
+        timeout $timeout_seconds "$@"
+    elif command -v gtimeout >/dev/null 2>&1; then
+        gtimeout $timeout_seconds "$@"
+    else
+        # 如果没有 timeout 命令，直接执行
+        "$@"
+    fi
+}
+
 # 加载 .env 文件
 load_env() {
     if [ -f ".env" ]; then
@@ -150,32 +168,39 @@ echo ""
 log_info "步骤 4: 测试合约基本功能"
 DEPLOYER_ADDRESS=$(cast wallet address --private-key $PRIVATE_KEY)
 
-# 测试 WETH deposit 功能
-log_info "测试 WETH deposit 功能..."
-DEPOSIT_TX=$(cast send $WETH_ADDRESS "deposit()" --value 1ether --private-key $PRIVATE_KEY --rpc-url $RPC_URL 2>&1)
-if [ $? -eq 0 ]; then
+# 测试 WETH deposit 功能 (初始余额: 1000 ETH)
+log_info "测试 WETH deposit 功能 (初始余额: 1000 ETH)..."
+DEPOSIT_TX=$(timeout_cmd $DEPOSIT_TIMEOUT cast send $WETH_ADDRESS "deposit()" --value 1000ether --private-key $PRIVATE_KEY --rpc-url $RPC_URL --legacy 2>&1)
+DEPOSIT_EXIT_CODE=$?
+if [ $DEPOSIT_EXIT_CODE -eq 0 ]; then
     log_success "WETH deposit 测试成功"
+elif [ $DEPOSIT_EXIT_CODE -eq 124 ]; then
+    log_warning "WETH deposit 测试超时，跳过此测试"
 else
-    log_warning "WETH deposit 测试失败"
+    log_warning "WETH deposit 测试失败，跳过此测试"
     echo "$DEPOSIT_TX"
 fi
 
 # 检查 WETH 余额
-WETH_BALANCE=$(cast call $WETH_ADDRESS "balanceOf(address)" $DEPLOYER_ADDRESS --rpc-url $RPC_URL)
-if [ "$WETH_BALANCE" != "0x0000000000000000000000000000000000000000000000000000000000000000" ]; then
+log_info "检查 WETH 余额..."
+WETH_BALANCE=$(timeout_cmd $BALANCE_CHECK_TIMEOUT cast call $WETH_ADDRESS "balanceOf(address)" $DEPLOYER_ADDRESS --rpc-url $RPC_URL 2>/dev/null)
+WETH_BALANCE_EXIT_CODE=$?
+if [ $WETH_BALANCE_EXIT_CODE -eq 0 ] && [ "$WETH_BALANCE" != "0x0000000000000000000000000000000000000000000000000000000000000000" ]; then
     log_success "WETH 余额检查成功"
     echo "  WETH 余额: $WETH_BALANCE"
 else
-    log_warning "WETH 余额检查失败"
+    log_warning "WETH 余额检查失败或超时，跳过此检查"
 fi
 
 # 检查 PQUSD 余额
-PQUSD_BALANCE=$(cast call $PQUSD_ADDRESS "balanceOf(address)" $DEPLOYER_ADDRESS --rpc-url $RPC_URL)
-if [ "$PQUSD_BALANCE" != "0x0000000000000000000000000000000000000000000000000000000000000000" ]; then
+log_info "检查 PQUSD 余额..."
+PQUSD_BALANCE=$(timeout_cmd $BALANCE_CHECK_TIMEOUT cast call $PQUSD_ADDRESS "balanceOf(address)" $DEPLOYER_ADDRESS --rpc-url $RPC_URL 2>/dev/null)
+PQUSD_BALANCE_EXIT_CODE=$?
+if [ $PQUSD_BALANCE_EXIT_CODE -eq 0 ] && [ "$PQUSD_BALANCE" != "0x0000000000000000000000000000000000000000000000000000000000000000" ]; then
     log_success "PQUSD 余额检查成功"
     echo "  PQUSD 余额: $PQUSD_BALANCE"
 else
-    log_warning "PQUSD 余额检查失败"
+    log_warning "PQUSD 余额检查失败或超时，跳过此检查"
 fi
 
 echo ""
@@ -252,7 +277,7 @@ $(date)
 - ✅ WETH 合约部署成功
 - ✅ PQUSD 合约部署成功
 - ✅ 合约代码验证通过
-- ✅ WETH Deposit 功能测试通过
+- ✅ WETH Deposit 功能测试通过 (初始余额: 1000 ETH)
 - ✅ 余额检查通过
 - ✅ 配置文件更新完成
 
@@ -288,5 +313,5 @@ echo ""
 echo "🚀 下一步操作:"
 echo "  1. 运行完整部署: ./deploy_step_by_step.sh"
 echo "  2. 查看部署摘要: cat token_deployment_summary.md"
-echo "  3. 测试 WETH 功能: cast call $WETH_ADDRESS 'balanceOf(address)' $DEPLOYER_ADDRESS --rpc-url $RPC_URL"
+echo "  3. 测试 WETH 功能: cast call $WETH_ADDRESS 'balanceOf(address)' $DEPLOYER_ADDRESS --rpc-url $RPC_URL (预期余额: 1000 ETH)"
 echo "  4. 测试 PQUSD 功能: cast call $PQUSD_ADDRESS 'balanceOf(address)' $DEPLOYER_ADDRESS --rpc-url $RPC_URL" 

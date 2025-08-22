@@ -38,9 +38,9 @@ show_help() {
     echo "操作选项:"
     echo "  swap          - 执行 WETH -> PQUSD 交换"
     echo "  swap-reverse  - 执行 PQUSD -> WETH 交换"
-    echo "  add-liquidity - 添加流动性"
     echo "  balance       - 查询用户余额"
     echo "  pool-info     - 查询池信息"
+    echo "  liquidity-status - 查询流动性状态"
     echo "  help          - 显示此帮助信息"
     echo ""
     echo "示例:"
@@ -61,14 +61,14 @@ run_operation() {
         "swap-reverse")
             function_name="swapTokensReverse()"
             ;;
-        "add-liquidity")
-            function_name="addUserLiquidity()"
-            ;;
         "balance")
             function_name="checkUserBalance()"
             ;;
         "pool-info")
             function_name="checkPoolInfo()"
+            ;;
+        "liquidity-status")
+            function_name="checkLiquidityStatus()"
             ;;
         *)
             echo "错误: 未知操作 '$operation'"
@@ -105,7 +105,7 @@ main() {
     local operation=$1
     
     case $operation in
-        "swap"|"swap-reverse"|"add-liquidity"|"balance"|"pool-info")
+        "swap"|"swap-reverse"|"balance"|"pool-info"|"liquidity-status")
             run_operation $operation
             ;;
         "help"|"-h"|"--help")
