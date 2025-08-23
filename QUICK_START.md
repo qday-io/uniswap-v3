@@ -1,91 +1,91 @@
-# Uniswap V3 Foundry 快速开始指南
+# Uniswap V3 Foundry Quick Start Guide
 
-## 🚀 快速部署
+## 🚀 Quick Deployment
 
-### 1. 准备环境
+### 1. Prepare Environment
 
 ```bash
-# 确保已安装 Foundry
+# Ensure Foundry is installed
 curl -L https://foundry.paradigm.xyz | bash
 foundryup
 
-# 克隆项目（如果还没有）
+# Clone project (if not already done)
 git clone <your-repo-url>
 cd uniswapV3_foundry_deployment
 ```
 
-### 2. 安装依赖
+### 2. Install Dependencies
 
 ```bash
-# 安装所有依赖
+# Install all dependencies
 forge install
 forge build
 ```
 
-### 3. 配置环境变量
+### 3. Configure Environment Variables
 
 ```bash
-# 复制示例文件
+# Copy example file
 cp env.example .env
 
-# 编辑 .env 文件
+# Edit .env file
 nano .env
 ```
 
-在 `.env` 文件中设置：
+In the `.env` file, set:
 
 ```bash
-# 本地测试（使用 Anvil 默认私钥）
+# Local testing (using Anvil default private key)
 PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 RPC_URL=http://localhost:8545
 
-# 生产环境
+# Production environment
 # PRIVATE_KEY=your_private_key_here
 # RPC_URL=https://sepolia.base.org
 ```
 
-### 4. 启动本地节点（可选）
+### 4. Start Local Node (Optional)
 
 ```bash
-# 启动 Anvil 节点
+# Start Anvil node
 anvil
 ```
 
-### 5. 部署 WETH 和 PQUSD
+### 5. Deploy WETH and PQUSD
 
 ```bash
-# 部署 WETH 和 PQUSD 合约
+# Deploy WETH and PQUSD contracts
 ./deploy_weth_pqusd.sh
 ```
 
-### 6. 运行完整部署脚本
+### 6. Run Complete Deployment Script
 
 ```bash
-# 一键部署 Uniswap V3
+# One-click Uniswap V3 deployment
 ./deploy_step_by_step.sh
 ```
 
-### 7. 部署 QuoterV2 合约
+### 7. Deploy QuoterV2 Contract
 
 ```bash
-# 部署 QuoterV2 合约
+# Deploy QuoterV2 contract
 ./run_deploy_quoterV2.sh deploy
 
-# 验证 QuoterV2 部署
+# Verify QuoterV2 deployment
 ./run_deploy_quoterV2.sh verify
 
-# 测试 QuoterV2 功能
+# Test QuoterV2 functionality
 ./run_deploy_quoterV2.sh test
 ```
 
-## 📋 部署结果
+## 📋 Deployment Results
 
-部署完成后，您将看到：
+After deployment, you will see:
 
 ```
-🎉 Uniswap V3 Foundry 部署完成！
+🎉 Uniswap V3 Foundry deployment completed!
 
-📋 部署摘要:
+📋 Deployment Summary:
   Factory: 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0
   SwapRouter: 0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9
   NFTDescriptor: 0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9
@@ -95,20 +95,20 @@ anvil
   PQUSD: 0x1984973E205CFBc454C7092d3aD051B54aB6663e
   QuoterV2: 0x8b17423CFD1882e2493983DA0dA7FD72032C67A1
 
-📄 详细摘要已保存到: deployment_summary.md
+📄 Detailed summary saved to: deployment_summary.md
 ```
 
-## 📄 .env 文件效果
+## 📄 .env File Effect
 
-部署完成后，您的 `.env` 文件将包含所有必要的合约地址：
+After deployment, your `.env` file will contain all necessary contract addresses:
 
-### 部署前的 .env 文件
+### .env File Before Deployment
 ```bash
-# 基础配置
+# Basic configuration
 PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 RPC_URL=http://localhost:8545
 
-# 合约地址（部署前为空或占位符）
+# Contract addresses (empty or placeholder before deployment)
 WETH_ADDRESS=0x1234567890123456789012345678901234567890
 PQUSD_ADDRESS=0x1234567890123456789012345678901234567890
 POSITION_MANAGER_ADDRESS=0x1234567890123456789012345678901234567890
@@ -117,49 +117,49 @@ SWAP_ROUTER_ADDRESS=0x1234567890123456789012345678901234567890
 QUOTER_V2_ADDRESS=0x1234567890123456789012345678901234567890
 ```
 
-### 部署后的 .env 文件
+### .env File After Deployment
 ```bash
-# 基础配置
+# Basic configuration
 PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 RPC_URL=http://localhost:8545
 
-# 代币合约地址（由 deploy_weth_pqusd.sh 设置）
+# Token contract addresses (set by deploy_weth_pqusd.sh)
 WETH_ADDRESS=0x37Ed4cf559Ed4034040F4045045ff3Ff6f3ce5E5
 PQUSD_ADDRESS=0x1984973E205CFBc454C7092d3aD051B54aB6663e
 
-# Uniswap V3 核心合约地址（由 deploy_step_by_step.sh 设置）
+# Uniswap V3 core contract addresses (set by deploy_step_by_step.sh)
 FACTORY_ADDRESS=0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0
 SWAP_ROUTER_ADDRESS=0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9
 POSITION_MANAGER_ADDRESS=0x0165878A594ca255338adfa4d48449f69242Eb8F
 QUOTER_V2_ADDRESS=0x8b17423CFD1882e2493983DA0dA7FD72032C67A1
 
-# 网络配置
+# Network configuration
 CHAIN_ID=31337
 ```
 
-### 环境变量的作用
+### Purpose of Environment Variables
 
-每个环境变量都有特定的用途：
+Each environment variable has a specific purpose:
 
-| 变量名 | 用途 | 设置脚本 |
-|--------|------|----------|
-| `WETH_ADDRESS` | WETH 代币合约地址 | `deploy_weth_pqusd.sh` |
-| `PQUSD_ADDRESS` | PQUSD 代币合约地址 | `deploy_weth_pqusd.sh` |
-| `FACTORY_ADDRESS` | Uniswap V3 工厂合约 | `deploy_step_by_step.sh` |
-| `SWAP_ROUTER_ADDRESS` | 交换路由器合约 | `deploy_step_by_step.sh` |
-| `POSITION_MANAGER_ADDRESS` | NFT 位置管理器 | `deploy_step_by_step.sh` |
-| `QUOTER_V2_ADDRESS` | 报价合约 | `run_deploy_quoterV2.sh` |
+| Variable Name | Purpose | Set By Script |
+|---------------|---------|---------------|
+| `WETH_ADDRESS` | WETH token contract address | `deploy_weth_pqusd.sh` |
+| `PQUSD_ADDRESS` | PQUSD token contract address | `deploy_weth_pqusd.sh` |
+| `FACTORY_ADDRESS` | Uniswap V3 factory contract | `deploy_step_by_step.sh` |
+| `SWAP_ROUTER_ADDRESS` | Swap router contract | `deploy_step_by_step.sh` |
+| `POSITION_MANAGER_ADDRESS` | NFT position manager | `deploy_step_by_step.sh` |
+| `QUOTER_V2_ADDRESS` | Quotation contract | `run_deploy_quoterV2.sh` |
 
-### 验证 .env 文件
+### Verify .env File
 
-您可以使用以下命令验证 `.env` 文件是否正确设置：
+You can use the following commands to verify if the `.env` file is correctly set:
 
 ```bash
-# 加载环境变量
+# Load environment variables
 source .env
 
-# 检查所有环境变量
-echo "=== 环境变量检查 ==="
+# Check all environment variables
+echo "=== Environment Variable Check ==="
 echo "WETH_ADDRESS: $WETH_ADDRESS"
 echo "PQUSD_ADDRESS: $PQUSD_ADDRESS"
 echo "FACTORY_ADDRESS: $FACTORY_ADDRESS"
@@ -167,129 +167,129 @@ echo "SWAP_ROUTER_ADDRESS: $SWAP_ROUTER_ADDRESS"
 echo "POSITION_MANAGER_ADDRESS: $POSITION_MANAGER_ADDRESS"
 echo "QUOTER_V2_ADDRESS: $QUOTER_V2_ADDRESS"
 
-# 验证合约地址（检查是否有合约代码）
+# Verify contract addresses (check if contract code exists)
 echo ""
-echo "=== 合约验证 ==="
+echo "=== Contract Verification ==="
 if [ ! -z "$WETH_ADDRESS" ] && [ "$WETH_ADDRESS" != "0x1234567890123456789012345678901234567890" ]; then
-    echo "✅ WETH 合约已部署: $WETH_ADDRESS"
+    echo "✅ WETH contract deployed: $WETH_ADDRESS"
 else
-    echo "❌ WETH 合约未部署或地址无效"
+    echo "❌ WETH contract not deployed or address invalid"
 fi
 
 if [ ! -z "$PQUSD_ADDRESS" ] && [ "$PQUSD_ADDRESS" != "0x1234567890123456789012345678901234567890" ]; then
-    echo "✅ PQUSD 合约已部署: $PQUSD_ADDRESS"
+    echo "✅ PQUSD contract deployed: $PQUSD_ADDRESS"
 else
-    echo "❌ PQUSD 合约未部署或地址无效"
+    echo "❌ PQUSD contract not deployed or address invalid"
 fi
 
 if [ ! -z "$FACTORY_ADDRESS" ] && [ "$FACTORY_ADDRESS" != "0x1234567890123456789012345678901234567890" ]; then
-    echo "✅ Factory 合约已部署: $FACTORY_ADDRESS"
+    echo "✅ Factory contract deployed: $FACTORY_ADDRESS"
 else
-    echo "❌ Factory 合约未部署或地址无效"
+    echo "❌ Factory contract not deployed or address invalid"
 fi
 
-# 使用 cast 验证合约代码
+# Use cast to verify contract code
 echo ""
-echo "=== 合约代码验证 ==="
+echo "=== Contract Code Verification ==="
 if [ ! -z "$WETH_ADDRESS" ]; then
     WETH_CODE=$(cast code $WETH_ADDRESS --rpc-url $RPC_URL 2>/dev/null)
     if [ "$WETH_CODE" != "0x" ] && [ ! -z "$WETH_CODE" ]; then
-        echo "✅ WETH 合约代码存在"
+        echo "✅ WETH contract code exists"
     else
-        echo "❌ WETH 合约代码不存在"
+        echo "❌ WETH contract code does not exist"
     fi
 fi
 
 if [ ! -z "$PQUSD_ADDRESS" ]; then
     PQUSD_CODE=$(cast code $PQUSD_ADDRESS --rpc-url $RPC_URL 2>/dev/null)
     if [ "$PQUSD_CODE" != "0x" ] && [ ! -z "$PQUSD_CODE" ]; then
-        echo "✅ PQUSD 合约代码存在"
+        echo "✅ PQUSD contract code exists"
     else
-        echo "❌ PQUSD 合约代码不存在"
+        echo "❌ PQUSD contract code does not exist"
     fi
 fi
 ```
 
-### 验证示例
+### Verification Examples
 
-#### 部署前的验证结果
+#### Verification Results Before Deployment
 ```bash
-=== 环境变量检查 ===
+=== Environment Variable Check ===
 WETH_ADDRESS: 0x1234567890123456789012345678901234567890
 PQUSD_ADDRESS: 0x1234567890123456789012345678901234567890
 FACTORY_ADDRESS: 0x1234567890123456789012345678901234567890
 
-=== 合约验证 ===
-❌ WETH 合约未部署或地址无效
-❌ PQUSD 合约未部署或地址无效
-❌ Factory 合约未部署或地址无效
+=== Contract Verification ===
+❌ WETH contract not deployed or address invalid
+❌ PQUSD contract not deployed or address invalid
+❌ Factory contract not deployed or address invalid
 
-=== 合约代码验证 ===
-❌ WETH 合约代码不存在
-❌ PQUSD 合约代码不存在
+=== Contract Code Verification ===
+❌ WETH contract code does not exist
+❌ PQUSD contract code does not exist
 ```
 
-#### 部署后的验证结果
+#### Verification Results After Deployment
 ```bash
-=== 环境变量检查 ===
+=== Environment Variable Check ===
 WETH_ADDRESS: 0x37Ed4cf559Ed4034040F4045045ff3Ff6f3ce5E5
 PQUSD_ADDRESS: 0x1984973E205CFBc454C7092d3aD051B54aB6663e
 FACTORY_ADDRESS: 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0
 QUOTER_V2_ADDRESS: 0x8b17423CFD1882e2493983DA0dA7FD72032C67A1
 
-=== 合约验证 ===
-✅ WETH 合约已部署: 0x37Ed4cf559Ed4034040F4045045ff3Ff6f3ce5E5
-✅ PQUSD 合约已部署: 0x1984973E205CFBc454C7092d3aD051B54aB6663e
-✅ Factory 合约已部署: 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0
-✅ QuoterV2 合约已部署: 0x8b17423CFD1882e2493983DA0dA7FD72032C67A1
+=== Contract Verification ===
+✅ WETH contract deployed: 0x37Ed4cf559Ed4034040F4045045ff3Ff6f3ce5E5
+✅ PQUSD contract deployed: 0x1984973E205CFBc454C7092d3aD051B54aB6663e
+✅ Factory contract deployed: 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0
+✅ QuoterV2 contract deployed: 0x8b17423CFD1882e2493983DA0dA7FD72032C67A1
 
-=== 合约代码验证 ===
-✅ WETH 合约代码存在
-✅ PQUSD 合约代码存在
-✅ QuoterV2 合约代码存在
+=== Contract Code Verification ===
+✅ WETH contract code exists
+✅ PQUSD contract code exists
+✅ QuoterV2 contract code exists
 ```
 
-## 🔧 验证部署
+## 🔧 Verify Deployment
 
 ```bash
-# 验证工厂合约
+# Verify factory contract
 cast call <FACTORY_ADDRESS> "owner()" --rpc-url http://localhost:8545
 
-# 验证路由器合约
+# Verify router contract
 cast call <ROUTER_ADDRESS> "factory()" --rpc-url http://localhost:8545
 
-# 验证 WETH 合约
+# Verify WETH contract
 cast call <WETH_ADDRESS> "name()" --rpc-url http://localhost:8545
 
-# 验证 PQUSD 合约
+# Verify PQUSD contract
 cast call <PQUSD_ADDRESS> "name()" --rpc-url http://localhost:8545
 
-# 验证 QuoterV2 合约
+# Verify QuoterV2 contract
 cast call <QUOTER_V2_ADDRESS> "factory()" --rpc-url http://localhost:8545
 ```
 
-## 📁 生成的文件
+## 📁 Generated Files
 
-- `deployment_summary.md` - 完整的部署摘要
-- `token_deployment_summary.md` - WETH 和 PQUSD 部署摘要
-- `*.backup` - 配置文件备份
+- `deployment_summary.md` - Complete deployment summary
+- `token_deployment_summary.md` - WETH and PQUSD deployment summary
+- `*.backup` - Configuration file backups
 
-## 🌐 网络配置
+## 🌐 Network Configuration
 
-### 本地测试
+### Local Testing
 ```bash
 PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 RPC_URL=http://localhost:8545
 ```
 
-### Base Sepolia 测试网
+### Base Sepolia Testnet
 ```bash
 PRIVATE_KEY=your_private_key_here
 RPC_URL=https://sepolia.base.org
 ETHERSCAN_API_KEY=your_api_key_here
 ```
 
-### 其他网络
+### Other Networks
 ```bash
 PRIVATE_KEY=your_private_key_here
 RPC_URL=https://your_rpc_url
@@ -298,90 +298,122 @@ WETH_ADDRESS=your_weth_address
 PQUSD_ADDRESS=your_pqusd_address
 ```
 
-## ⚠️ 安全注意事项
+## ⚠️ Security Considerations
 
-1. **私钥安全**
-   - 永远不要提交 `.env` 文件到版本控制
-   - 使用安全的密钥管理工具
+1. **Private Key Security**
+   - Never commit `.env` file to version control
+   - Use secure key management tools
 
-2. **网络选择**
-   - 测试环境：使用 Anvil 或测试网
-   - 生产环境：使用主网或目标网络
+2. **Network Selection**
+   - Testing environment: Use Anvil or testnet
+   - Production environment: Use mainnet or target network
 
-3. **验证部署**
-   - 脚本会自动验证部署
-   - 建议手动验证关键功能
+3. **Verify Deployment**
+   - Scripts automatically verify deployment
+   - Recommend manual verification of key functionality
 
-## 🆘 故障排除
+## 🆘 Troubleshooting
 
-### 常见问题
+### Common Issues
 
-1. **找不到 .env 文件**
+1. **Cannot find .env file**
    ```bash
    cp env.example .env
    ```
 
-2. **编译失败**
+2. **Compilation failed**
    ```bash
    forge install
    forge build
    ```
 
-3. **部署失败**
-   - 检查私钥是否正确
-   - 确保账户有足够的 ETH
-   - 验证 RPC URL 是否可访问
+3. **Deployment failed**
+   - Check if private key is correct
+   - Ensure account has sufficient ETH
+   - Verify RPC URL is accessible
 
-### 重新部署
+### Redeploy
 
 ```bash
-# 清理之前的部署
+# Clean up previous deployment
 rm -f deployment_summary.md
 rm -f token_deployment_summary.md
 
-# 恢复备份文件（如果需要）
+# Restore backup files (if needed)
 cp lib/v3-periphery/contracts/libraries/PoolAddress.sol.backup lib/v3-periphery/contracts/libraries/PoolAddress.sol
 cp src/deployConstructor/SwapRouter.txt.backup src/deployConstructor/SwapRouter.txt
 cp src/deployConstructor/NonfungiblePositionManager.txt.backup src/deployConstructor/NonfungiblePositionManager.txt
 
-# 重新部署 WETH 和 PQUSD
+# Redeploy WETH and PQUSD
 ./deploy_weth_pqusd.sh
 
-# 重新运行完整部署脚本
+# Re-run complete deployment script
 ./deploy_step_by_step.sh
 
-# 重新部署 QuoterV2
+# Redeploy QuoterV2
 ./run_deploy_quoterV2.sh deploy
 ```
 
-## 🧪 测试功能
+## 🧪 Test Features
 
-部署完成后，您可以测试各种功能：
+After deployment, you can test various features:
 
 ```bash
-# 检查合约配置
+# Check contract configuration
 ./check_weth_pqusd.sh
 
-# 测试用户操作
+# Test user operations
 ./run_user_operation.sh balance
-./run_user_operation.sh swap
-./run_user_operation.sh add-liquidity
+./run_user_operation.sh swap 5          # Swap 5 ETH
+./run_user_operation.sh swap-reverse 100 # Swap 100 PQUSD
 
-# 测试流动性管理
+# Test liquidity management
 ./run_liquidity_management.sh mint
-./run_liquidity_management.sh increase
+./run_liquidity_management.sh increase 100 1000  # 100 ETH, 1000 tokens
+./run_liquidity_management.sh collect
+./run_liquidity_management.sh balance
 
-# 测试 QuoterV2
-./run_deploy_quoterV2.sh test
+# Test QuoterV2
+./run_deploy_quoterV2.sh test 5        # Test with 5 ETH
+
+# Test WETH deposit
+./run_weth_deposit.sh
 ```
 
-## 📚 更多信息
+## 📡 Advanced Features
 
-- [详细部署指南](STEP_BY_STEP_DEPLOYMENT.md)
-- [脚本使用说明](SCRIPT_USAGE.md)
-- [用户操作指南](USER_OPERATION_USAGE.md)
-- [原始项目方法](ORIGINAL_DEPLOYMENT_GUIDE.md)
+### Event Monitoring
+```bash
+# Monitor all events
+./run_event_monitor.sh all-events
+
+# Real-time monitoring
+./run_realtime_monitor.sh all-follow
+
+# Monitor specific contract events
+./run_event_monitor.sh pool-events <pool_address>
+./run_event_monitor.sh factory-events <factory_address>
+./run_event_monitor.sh position-events <position_manager_address>
+```
+
+### Custom Operations
+```bash
+# Custom swap amounts
+./run_user_operation.sh swap 10         # Swap 10 ETH
+./run_user_operation.sh swap-reverse 500 # Swap 500 PQUSD
+
+# Custom liquidity amounts
+./run_liquidity_management.sh increase 50 500   # 50 ETH, 500 tokens
+./run_liquidity_management.sh increase 200 2000 # 200 ETH, 2000 tokens
+```
+
+## 📚 More Information
+
+- [Detailed Deployment Guide](STEP_BY_STEP_DEPLOYMENT.md)
+- [Script Usage Instructions](SCRIPT_USAGE.md)
+- [User Operation Guide](USER_OPERATION_USAGE.md)
+- [Original Project Method](ORIGINAL_DEPLOYMENT_GUIDE.md)
 
 ---
 
-*这个快速开始指南帮助您在几分钟内完成 Uniswap V3 的部署！*
+*This quick start guide helps you complete Uniswap V3 deployment in minutes with advanced features!*

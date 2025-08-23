@@ -1,262 +1,323 @@
-# Uniswap V3 Foundry 部署项目
+# Uniswap V3 Foundry Deployment Project
 
-这是一个使用 Foundry 部署 Uniswap V3 的完整项目。项目包含了所有必要的合约部署脚本和工具，支持 WETH 和 PQUSD 代币。
+This is a complete project for deploying Uniswap V3 using Foundry. The project includes all necessary contract deployment scripts and tools, supporting WETH and PQUSD tokens with comprehensive liquidity management and monitoring capabilities.
 
-## 🚀 快速开始
+## 🚀 Quick Start
 
-### 1. 克隆项目
+### 1. Clone Project
 ```bash
 git clone <your-repo-url>
 cd uniswapV3_foundry_deployment
 ```
 
-### 2. 安装依赖
+### 2. Install Dependencies
 ```bash
 forge install
 forge build
 ```
 
-### 3. 配置环境变量
+### 3. Configure Environment Variables
 ```bash
-# 复制示例文件
+# Copy example file
 cp env.example .env
 
-# 编辑 .env 文件
+# Edit .env file
 nano .env
 ```
 
-### 4. 部署 WETH 和 PQUSD
+### 4. Deploy WETH and PQUSD
 ```bash
-# 部署代币合约
+# Deploy token contracts
 ./deploy_weth_pqusd.sh
 ```
 
-### 5. 检查合约配置
+### 5. Check Contract Configuration
 ```bash
-# 检查 WETH 和 PQUSD 合约
+# Check WETH and PQUSD contracts
 ./check_weth_pqusd.sh
 ```
 
-### 6. 部署 Uniswap V3
+### 6. Deploy Uniswap V3
 ```bash
-# 启动 Anvil 节点
+# Start Anvil node
 anvil
 
-# 在另一个终端中运行部署
+# Run deployment in another terminal
 ./deploy_step_by_step.sh
 ```
 
-### 7. 部署 QuoterV2
+### 7. Deploy QuoterV2
 ```bash
-# 部署 QuoterV2 合约
+# Deploy QuoterV2 contract
 ./run_deploy_quoterV2.sh deploy
 
-# 验证部署
+# Verify deployment
 ./run_deploy_quoterV2.sh verify
 
-# 测试功能
+# Test functionality
 ./run_deploy_quoterV2.sh test
 ```
 
-## 📁 项目结构
+## 📁 Project Structure
 
 ```
 uniswapV3_foundry_deployment/
 ├── script/
-│   ├── deployQuoterV2.s.sol      # QuoterV2 部署脚本
-│   ├── liquidityManagement.s.sol  # 流动性管理脚本
-│   ├── useOperation.s.sol         # 用户操作脚本
-│   └── wethDeposit.s.sol         # WETH 存款脚本
+│   ├── deployQuoterV2.s.sol      # QuoterV2 deployment script
+│   ├── liquidityManagement.s.sol  # Liquidity management script
+│   ├── useOperation.s.sol         # User operation script
+│   └── wethDeposit.s.sol         # WETH deposit script
 ├── src/
-│   ├── WETH.sol                  # WETH 合约
-│   ├── PQUSD.sol                 # PQUSD 代币合约
-│   └── deployConstructor/        # 部署构造函数
-├── lib/                          # 依赖库
-├── deploy_weth_pqusd.sh         # WETH 和 PQUSD 部署脚本
-├── check_weth_pqusd.sh          # 合约配置检查脚本
-├── deploy_step_by_step.sh       # 完整部署脚本
-├── run_deploy_quoterV2.sh       # QuoterV2 部署脚本
-├── run_liquidity_management.sh   # 流动性管理脚本
-├── run_user_operation.sh         # 用户操作脚本
-├── QUICK_START.md               # 快速开始指南
-└── foundry.toml                 # Foundry 配置
+│   ├── WETH.sol                  # WETH contract
+│   ├── PQUSD.sol                 # PQUSD token contract
+│   ├── UniswapV3FactoryFoundry.sol # Factory contract wrapper
+│   ├── SwapRouterFoundry.sol     # Router contract wrapper
+│   ├── NonfungiblePositionManagerFoundry.sol # Position manager wrapper
+│   ├── NonfungibleTokenPositionDescriptorFoundry.sol # Descriptor wrapper
+│   └── NFTDescriptor.sol         # NFT descriptor contract
+├── lib/                          # Dependencies
+├── deploy_weth_pqusd.sh         # WETH and PQUSD deployment script
+├── check_weth_pqusd.sh          # Contract configuration check script
+├── deploy_step_by_step.sh       # Complete deployment script
+├── run_deploy_quoterV2.sh       # QuoterV2 deployment script
+├── run_liquidity_management.sh   # Liquidity management script
+├── run_user_operation.sh         # User operation script
+├── run_weth_deposit.sh          # WETH deposit script
+├── run_event_monitor.sh          # Event monitoring script
+├── run_realtime_monitor.sh       # Real-time event monitoring script
+├── QUICK_START.md               # Quick start guide
+└── foundry.toml                 # Foundry configuration
 ```
 
-## 🔧 部署的合约
+## 🔧 Deployed Contracts
 
-### 代币合约
-1. **WETH** - Wrapped Ether 合约
-2. **PQUSD** - PQ USD 代币合约
+### Token Contracts
+1. **WETH** - Wrapped Ether contract
+2. **PQUSD** - PQ USD token contract
 
-### Uniswap V3 核心合约
-3. **UniswapV3Factory** - 工厂合约，用于创建流动性池
-4. **SwapRouter** - 交换路由器，用于执行代币交换
-5. **NonfungibleTokenPositionDescriptor** - NFT 位置描述符
-6. **NonfungiblePositionManager** - NFT 位置管理器
-7. **QuoterV2** - 价格报价合约
+### Uniswap V3 Core Contracts
+3. **UniswapV3Factory** - Factory contract for creating liquidity pools
+4. **SwapRouter** - Swap router for executing token swaps
+5. **NonfungibleTokenPositionDescriptor** - NFT position descriptor
+6. **NonfungiblePositionManager** - NFT position manager
+7. **QuoterV2** - Price quotation contract
 
-## 🌐 支持的网络
+## 🌐 Supported Networks
 
-### 本地测试 (Anvil)
+### Local Testing (Anvil)
 - **RPC URL**: `http://localhost:8545`
 - **Chain ID**: 31337
-- **WETH**: 自动部署
-- **PQUSD**: 自动部署
+- **WETH**: Auto-deployed
+- **PQUSD**: Auto-deployed
 
-### Base Sepolia 测试网
-- **WETH 地址**: `0x4200000000000000000000000000000000000006`
+### Base Sepolia Testnet
+- **WETH Address**: `0x4200000000000000000000000000000000000006`
 - **RPC URL**: `https://sepolia.base.org`
 - **Chain ID**: 84532
 
-### 其他网络
-可以通过修改 `.env` 文件中的地址来支持其他网络。
+### Other Networks
+Support for other networks can be added by modifying addresses in the `.env` file.
 
-## 📋 部署脚本
+## 📋 Deployment Scripts
 
-### 代币部署 (`deploy_weth_pqusd.sh`)
-- 部署 WETH 和 PQUSD 合约
-- 自动更新配置文件
-- 生成部署摘要
+### Token Deployment (`deploy_weth_pqusd.sh`)
+- Deploy WETH and PQUSD contracts
+- Automatically update configuration files
+- Generate deployment summary
 
-### 合约检查 (`check_weth_pqusd.sh`)
-- 验证 WETH 和 PQUSD 合约
-- 测试合约基本功能
-- 检查部署者余额
+### Contract Check (`check_weth_pqusd.sh`)
+- Verify WETH and PQUSD contracts
+- Test basic contract functionality
+- Check deployer balance
 
-### 完整部署 (`deploy_step_by_step.sh`)
-- 使用 Anvil 本地节点
-- 自动检查合约配置
-- 逐步部署所有 Uniswap V3 合约
+### Complete Deployment (`deploy_step_by_step.sh`)
+- Use Anvil local node
+- Automatically check contract configuration
+- Step-by-step deployment of all Uniswap V3 contracts
 
-### QuoterV2 部署 (`run_deploy_quoterV2.sh`)
-- 部署 QuoterV2 合约
-- 验证部署状态
-- 测试报价功能
+### QuoterV2 Deployment (`run_deploy_quoterV2.sh`)
+- Deploy QuoterV2 contract
+- Verify deployment status
+- Test quotation functionality
 
-### 用户操作 (`run_user_operation.sh`)
-- 代币交换 (WETH ↔ PQUSD)
-- 添加流动性
-- 查询余额和池信息
+### User Operations (`run_user_operation.sh`)
+- Token swaps (WETH ↔ PQUSD) with custom amounts
+- Add liquidity
+- Query balance and pool information
+- Support for parameterized operations
 
-### 流动性管理 (`run_liquidity_management.sh`)
-- 添加流动性
-- 增加/减少流动性
-- 收集费用
-- 销毁位置
+### Liquidity Management (`run_liquidity_management.sh`)
+- Add liquidity (mint)
+- Increase/decrease liquidity with custom amounts
+- Collect fees
+- Burn positions
+- Query balance and liquidity status
 
-## 🧪 测试功能
+### WETH Deposit (`run_weth_deposit.sh`)
+- Execute WETH deposit operations
+- Support for custom deposit amounts
+- Automatic balance checking
 
-部署完成后，您可以测试各种功能：
+## 🧪 Testing Features
+
+After deployment, you can test various features:
 
 ```bash
-# 检查合约配置
+# Check contract configuration
 ./check_weth_pqusd.sh
 
-# 测试用户操作
+# Test user operations
 ./run_user_operation.sh balance
-./run_user_operation.sh swap
-./run_user_operation.sh add-liquidity
+./run_user_operation.sh swap 5          # Swap 5 ETH
+./run_user_operation.sh swap-reverse 100 # Swap 100 PQUSD
 
-# 测试流动性管理
+# Test liquidity management
 ./run_liquidity_management.sh mint
-./run_liquidity_management.sh increase
+./run_liquidity_management.sh increase 100 1000  # 100 ETH, 1000 tokens
+./run_liquidity_management.sh collect
+./run_liquidity_management.sh balance
 
-# 测试 QuoterV2
-./run_deploy_quoterV2.sh test
+# Test QuoterV2
+./run_deploy_quoterV2.sh test 5        # Test with 5 ETH
+
+# Test WETH deposit
+./run_weth_deposit.sh
 ```
 
-## 📡 事件监听
+## 📡 Event Monitoring
 
-项目提供了完整的事件监听和解码功能：
+The project provides comprehensive event monitoring and decoding functionality:
 
-### 基础事件监听
+### Basic Event Monitoring (`run_event_monitor.sh`)
 ```bash
-# 监听 Pool 事件
+# Monitor Pool events
 ./run_event_monitor.sh pool-events [pool_address]
 
-# 监听 Factory 事件
+# Monitor Factory events
 ./run_event_monitor.sh factory-events [factory_address]
 
-# 监听 Position Manager 事件
+# Monitor Position Manager events
 ./run_event_monitor.sh position-events [position_manager_address]
 
-# 监听所有事件
+# Monitor Router events
+./run_event_monitor.sh router-events [router_address]
+
+# Monitor QuoterV2 events
+./run_event_monitor.sh quoter-events [quoter_address]
+
+# Monitor Token events
+./run_event_monitor.sh token-events [token_address]
+
+# Monitor all events
 ./run_event_monitor.sh all-events
+
+# Decode specific events
+./run_event_monitor.sh decode-event [event_signature] [log_data]
 ```
 
-### 实时事件监听
+### Real-time Event Monitoring (`run_realtime_monitor.sh`)
 ```bash
-# 实时监听 Pool 事件
+# Real-time Pool event monitoring
 ./run_realtime_monitor.sh pool-follow [pool_address]
 
-# 实时监听所有事件
+# Real-time Factory event monitoring
+./run_realtime_monitor.sh factory-follow [factory_address]
+
+# Real-time Position Manager event monitoring
+./run_realtime_monitor.sh position-follow [position_manager_address]
+
+# Real-time monitoring of all events
 ./run_realtime_monitor.sh all-follow
 
-# 解码日志文件
+# Decode log files
 ./run_realtime_monitor.sh decode-logs events.log
 ```
 
-### 支持的事件类型
-- **Pool 事件**: Initialize, Mint, Burn, Swap, Collect, Flash
-- **Factory 事件**: PoolCreated, OwnerChanged
-- **Position Manager 事件**: IncreaseLiquidity, DecreaseLiquidity, Collect
+### Supported Event Types
+- **Pool Events**: Initialize, Mint, Burn, Swap, Collect, Flash, IncreaseObservationCardinalityNext, SetFeeProtocol, CollectProtocol
+- **Factory Events**: PoolCreated, OwnerChanged, FeeAmountEnabled
+- **Position Manager Events**: IncreaseLiquidity, DecreaseLiquidity, Collect
+- **Router Events**: All swap and routing events
+- **QuoterV2 Events**: Quote events
+- **ERC20 Events**: Transfer, Approval
+- **ERC721 Events**: Transfer, Approval, ApprovalForAll
 
-详细使用说明请参考 [EVENT_MONITOR_USAGE.md](./EVENT_MONITOR_USAGE.md)
+## 🔍 Verify Deployment
 
-## 🔍 验证部署
-
-部署完成后，您可以使用以下命令验证合约：
+After deployment, you can use the following commands to verify contracts:
 
 ```bash
-# 检查代币合约
+# Check token contracts
 cast call <WETH_ADDRESS> "name()" --rpc-url $RPC_URL
 cast call <PQUSD_ADDRESS> "name()" --rpc-url $RPC_URL
 
-# 检查工厂合约
+# Check factory contract
 cast call <FACTORY_ADDRESS> "owner()" --rpc-url $RPC_URL
 
-# 检查路由器合约
+# Check router contract
 cast call <ROUTER_ADDRESS> "factory()" --rpc-url $RPC_URL
 
-# 检查 QuoterV2 合约
+# Check QuoterV2 contract
 cast call <QUOTER_V2_ADDRESS> "factory()" --rpc-url $RPC_URL
 ```
 
-### 验证示例
+### Verification Examples
 
 ```bash
-# 使用项目中的 RPC URL
+# Use project RPC URL
 export RPC_URL=http://13.54.171.239:8123
 
-# 验证 WETH 合约
+# Verify WETH contract
 cast call 0x37Ed4cf559Ed4034040F4045045ff3Ff6f3ce5E5 "name()" --rpc-url $RPC_URL
-# 输出: Wrapped Ether
+# Output: Wrapped Ether
 
-# 验证 PQUSD 合约
+# Verify PQUSD contract
 cast call 0x1984973E205CFBc454C7092d3aD051B54aB6663e "name()" --rpc-url $RPC_URL
-# 输出: PQ USD
+# Output: PQ USD
 
-# 验证 Factory 合约
+# Verify Factory contract
 cast call 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0 "owner()" --rpc-url $RPC_URL
 ```
 
-## 🛠️ 环境要求
+## 🛠️ Requirements
 
-- Foundry 最新版本
-- Node.js (可选，用于额外工具)
-- 足够的 ETH 余额支付 gas 费用
+- Latest version of Foundry
+- Node.js (optional, for additional tools)
+- Sufficient ETH balance to pay gas fees
 
-## 📚 文档
+## 📚 Documentation
 
-- [QUICK_START.md](./QUICK_START.md) - 快速开始指南
-- [USER_OPERATION_USAGE.md](./USER_OPERATION_USAGE.md) - 用户操作指南
-- [SCRIPT_USAGE.md](./SCRIPT_USAGE.md) - 脚本使用说明
-- [STEP_BY_STEP_DEPLOYMENT.md](./STEP_BY_STEP_DEPLOYMENT.md) - 详细部署指南
-- [EVENT_MONITOR_USAGE.md](./EVENT_MONITOR_USAGE.md) - 事件监听和解码指南
-- [Foundry 文档](https://book.getfoundry.sh/)
-- [Uniswap V3 文档](https://docs.uniswap.org/)
+- [QUICK_START.md](./QUICK_START.md) - Quick start guide
+- [USER_OPERATION_USAGE.md](./USER_OPERATION_USAGE.md) - User operation guide
+- [SCRIPT_USAGE.md](./SCRIPT_USAGE.md) - Script usage instructions
+- [STEP_BY_STEP_DEPLOYMENT.md](./STEP_BY_STEP_DEPLOYMENT.md) - Detailed deployment guide
+- [EVENT_MONITOR_USAGE.md](./EVENT_MONITOR_USAGE.md) - Event monitoring and decoding guide
+- [Foundry Documentation](https://book.getfoundry.sh/)
+- [Uniswap V3 Documentation](https://docs.uniswap.org/)
 
-## 参考
+## 🆕 Latest Features
+
+### Enhanced Liquidity Management
+- **Parameterized Operations**: Support for custom amounts in ETH units
+- **Balance Tracking**: Automatic balance change monitoring
+- **Flexible Operations**: Mint, increase, decrease, collect, and burn positions
+
+### Advanced User Operations
+- **Custom Swap Amounts**: Specify exact amounts for token swaps
+- **Reverse Swaps**: Support for PQUSD to WETH swaps
+- **Balance Queries**: Comprehensive balance and approval status checking
+
+### Comprehensive Event Monitoring
+- **Multi-Contract Support**: Monitor events from all deployed contracts
+- **Real-time Monitoring**: Follow events as they happen
+- **Event Decoding**: Automatic decoding of complex event data
+- **Log Analysis**: Decode and analyze historical event logs
+
+### WETH Management
+- **Deposit Operations**: Execute WETH deposits with custom amounts
+- **Balance Verification**: Automatic balance checking before operations
+
+## References
 
 https://github.com/MarcusWentz/uniswapV3_foundry_deployment/blob/main/README.md
 
