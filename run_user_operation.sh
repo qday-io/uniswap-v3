@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# 用户操作脚本运行器
-# 使用方法: ./run_user_operation.sh [operation]
+# User Operation Script Runner
+# Usage: ./run_user_operation.sh [operation]
 
 set -e
 
-# 加载 .env 文件
+# Load .env file
 load_env() {
     if [ -f ".env" ]; then
         echo "Loading environment variables from .env file..."
@@ -15,51 +15,58 @@ load_env() {
     fi
 }
 
-# 检查环境变量
+# Check environment variables
 check_env_vars() {
     local required_vars=("PRIVATE_KEY" "WETH_ADDRESS" "PQUSD_ADDRESS" "SWAP_ROUTER_ADDRESS" "POSITION_MANAGER_ADDRESS" "FACTORY_ADDRESS")
     
     for var in "${required_vars[@]}"; do
         if [ -z "${!var}" ]; then
-            echo "错误: 环境变量 $var 未设置"
-            echo "请确保已设置所有必需的环境变量在 .env 文件或环境中"
+            echo "Error: Environment variable $var is not set"
+            echo "Please ensure all required environment variables are set in .env file or environment"
             exit 1
         fi
     done
 }
 
-# 显示帮助信息
+# Show help information
 show_help() {
-    echo "用户操作脚本运行器"
+    echo "User Operation Script Runner"
     echo ""
-    echo "使用方法:"
+    echo "Usage:"
     echo "  $0 [operation]"
     echo ""
-    echo "操作选项:"
-    echo "  swap          - 执行 WETH -> PQUSD 交换"
-    echo "  swap-reverse  - 执行 PQUSD -> WETH 交换"
-    echo "  balance       - 查询用户余额"
-    echo "  pool-info     - 查询池信息"
-    echo "  liquidity-status - 查询流动性状态"
-    echo "  help          - 显示此帮助信息"
+    echo "Operation options:"
+    echo "  swap          - Execute WETH -> PQUSD swap"
+    echo "  swap-reverse  - Execute PQUSD -> WETH swap"
+    echo "  balance       - Query user balance"
+    echo "  pool-info     - Query pool information"
+    echo "  liquidity-status - Query liquidity status"
+    echo "  help          - Show this help message"
     echo ""
-    echo "示例:"
-    echo "  $0 swap           # 执行代币交换"
-    echo "  $0 balance        # 查询余额"
-    echo "  $0 pool-info      # 查询池信息"
+    echo "Examples:"
+    echo "  $0 swap           # Execute token swap (default 1 ETH)"
+    echo "  $0 swap 5         # Execute token swap (5 ETH)"
+    echo "  $0 swap-reverse   # Execute reverse swap (default 1 ETH)"
+    echo "  $0 swap-reverse 100 # Execute reverse swap (100 PQUSD)"
+    echo "  $0 balance        # Query balance"
+    echo "  $0 pool-info      # Query pool information"
 }
 
-# 运行用户操作
+# Run user operation
 run_operation() {
     local operation=$1
+    local amount_in=${2:-1} # Default value is 1 ETH
     local function_name=""
+    local forge_args=""
     
     case $operation in
         "swap")
-            function_name="swapTokens()"
+            function_name="swapTokens(uint256)"
+            forge_args="$amount_in"
             ;;
         "swap-reverse")
-            function_name="swapTokensReverse()"
+            function_name="swapTokensReverse(uint256)"
+            forge_args="$amount_in"
             ;;
         "balance")
             function_name="checkUserBalance()"
@@ -71,33 +78,38 @@ run_operation() {
             function_name="checkLiquidityStatus()"
             ;;
         *)
-            echo "错误: 未知操作 '$operation'"
+            echo "Error: Unknown operation '$operation'"
             show_help
             exit 1
             ;;
     esac
     
-    echo "执行用户操作: $operation"
-    forge script script/useOperation.s.sol:UseOperation --sig "$function_name" --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --legacy 
+    echo "Executing user operation: $operation"
+    if [ -n "$forge_args" ]; then
+        echo "Swap amount: $amount_in ETH"
+        forge script script/useOperation.s.sol:UseOperation --sig "$function_name" $forge_args --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --legacy 
+    else
+        forge script script/useOperation.s.sol:UseOperation --sig "$function_name" --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --legacy 
+    fi
 }
 
-# 主函数
+# Main function
 main() {
-    # 加载 .env 文件
+    # Load .env file
     load_env
     
-    # 检查环境变量
+    # Check environment variables
     check_env_vars
     
-    # 检查 RPC_URL
+    # Check RPC_URL
     if [ -z "$RPC_URL" ]; then
-        echo "警告: RPC_URL 未设置，使用默认值 http://localhost:8545"
+        echo "Warning: RPC_URL not set, using default http://localhost:8545"
         export RPC_URL="http://localhost:8545"
     fi
     
-    # 处理参数
+    # Process parameters
     if [ $# -eq 0 ]; then
-        echo "错误: 请指定操作"
+        echo "Error: Please specify an operation"
         show_help
         exit 1
     fi
@@ -105,19 +117,24 @@ main() {
     local operation=$1
     
     case $operation in
-        "swap"|"swap-reverse"|"balance"|"pool-info"|"liquidity-status")
+        "swap"|"swap-reverse")
+            # For swap operations, pass the second parameter (amountIn)
+            local amount_in=${2:-1}
+            run_operation $operation $amount_in
+            ;;
+        "balance"|"pool-info"|"liquidity-status")
             run_operation $operation
             ;;
         "help"|"-h"|"--help")
             show_help
             ;;
         *)
-            echo "错误: 未知操作 '$operation'"
+            echo "Error: Unknown operation '$operation'"
             show_help
             exit 1
             ;;
     esac
 }
 
-# 运行主函数
+# Run main function
 main "$@" 

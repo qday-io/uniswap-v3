@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# QuoterV2 部署脚本
-# 使用方法: ./run_deploy_quoterV2.sh [operation]
+# QuoterV2 Deployment Script
+# Usage: ./run_deploy_quoterV2.sh [operation]
 
 set -e
 
-# 加载 .env 文件
+# Load .env file
 load_env() {
     if [ -f ".env" ]; then
         echo "Loading environment variables from .env file..."
@@ -15,7 +15,7 @@ load_env() {
     fi
 }
 
-# 检查环境变量
+# Check environment variables
 check_env_vars() {
     local required_vars=("PRIVATE_KEY" "FACTORY_ADDRESS" "WETH_ADDRESS")
     
@@ -28,7 +28,7 @@ check_env_vars() {
     done
 }
 
-# 显示帮助信息
+# Show help information
 show_help() {
     echo "QuoterV2 Deployment Script"
     echo ""
@@ -45,15 +45,16 @@ show_help() {
     echo "  $0 deploy   # Deploy QuoterV2"
     echo "  $0 verify   # Verify deployment"
     echo "  $0 test     # Test functionality"
+    echo "  $0 test 5   # Test with amountIn = 5"
 }
 
-# 部署 QuoterV2
+# Deploy QuoterV2
 deploy_quoterV2() {
     echo "Deploying QuoterV2..."
     forge script script/deployQuoterV2.s.sol:DeployQuoterV2 --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --legacy 
 }
 
-# 验证部署
+# Verify deployment
 verify_quoterV2() {
     if [ -z "$QUOTER_V2_ADDRESS" ]; then
         echo "Error: QUOTER_V2_ADDRESS not set"
@@ -65,7 +66,7 @@ verify_quoterV2() {
     forge script script/deployQuoterV2.s.sol:DeployQuoterV2 --sig "verifyQuoterV2()" --rpc-url $RPC_URL --private-key $PRIVATE_KEY --legacy  
 }
 
-# 测试功能
+# Test functionality
 test_quoterV2() {
     if [ -z "$QUOTER_V2_ADDRESS" ]; then
         echo "Error: QUOTER_V2_ADDRESS not set"
@@ -79,25 +80,27 @@ test_quoterV2() {
         exit 1
     fi
     
-    echo "Testing QuoterV2 functionality..."
-    forge script script/deployQuoterV2.s.sol:DeployQuoterV2 --sig "testQuoterV2()" --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --legacy 
+    # Get amountIn parameter, use default value 1 if not provided
+    local amountIn=${1:-1}
+    echo "Testing QuoterV2 functionality with amountIn: $amountIn"
+    forge script script/deployQuoterV2.s.sol:DeployQuoterV2 --sig "testQuoterV2(uint256)" $amountIn --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --legacy 
 }
 
-# 主函数
+# Main function
 main() {
-    # 加载 .env 文件
+    # Load .env file
     load_env
     
-    # 检查环境变量
+    # Check environment variables
     check_env_vars
     
-    # 检查 RPC_URL
+    # Check RPC_URL
     if [ -z "$RPC_URL" ]; then
         echo "Warning: RPC_URL not set, using default http://localhost:8545"
         export RPC_URL="http://localhost:8545"
     fi
     
-    # 处理参数
+    # Process parameters
     if [ $# -eq 0 ]; then
         echo "Error: Please specify an operation"
         show_help
@@ -114,7 +117,9 @@ main() {
             verify_quoterV2
             ;;
         "test")
-            test_quoterV2
+            # Pass amountIn parameter to test_quoterV2 function
+            shift  # Remove "test" parameter
+            test_quoterV2 "$@"
             ;;
         "help"|"-h"|"--help")
             show_help
@@ -122,10 +127,9 @@ main() {
         *)
             echo "Error: Unknown operation '$operation'"
             show_help
-            exit 1
             ;;
     esac
 }
 
-# 运行主函数
-main "$@" 
+# Run main function
+main "$@"

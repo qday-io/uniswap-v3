@@ -12,7 +12,7 @@ import { IERC20 } from "../lib/openzeppelin-contracts/contracts/token/ERC20/IERC
 contract UseOperation is Script {
     
     // 用户操作：执行代币交换
-    function swapTokens() public {
+    function swapTokens(uint256 amountInEth) public {
         address user = vm.addr(vm.envUint("PRIVATE_KEY"));
         
         // 从环境变量读取合约地址
@@ -22,7 +22,14 @@ contract UseOperation is Script {
         
         ISwapRouter swapRouter = ISwapRouter(swapRouterAddress);
         
+        // 将 ETH 转换为 wei
+        uint256 amountInWei = amountInEth * 10**18;
+        
         console.log("=== User Token Swap Operation ===");
+        console.log("Amount to swap (ETH):");
+        console.logUint(amountInEth);
+        console.log("Amount to swap (wei):");
+        console.logUint(amountInWei);
         
         // 检查用户余额
         uint256 wethBalance = IERC20(wethAddress).balanceOf(user);
@@ -34,6 +41,16 @@ contract UseOperation is Script {
         console.log("PQUSD:");
         console.logUint(pqusdBalance);
         
+        // 检查余额是否足够
+        if (wethBalance < amountInWei) {
+            console.log("Error: Insufficient WETH balance");
+            console.log("Required:");
+            console.logUint(amountInWei);
+            console.log("Available:");
+            console.logUint(wethBalance);
+            return;
+        }
+        
         // 开始广播交易
         vm.startBroadcast(user);
         
@@ -41,7 +58,7 @@ contract UseOperation is Script {
         uint256 wethAllowance = IERC20(wethAddress).allowance(user, swapRouterAddress);
         console.log("WETH allowance:");
         console.logUint(wethAllowance);
-        if (wethAllowance < 10000000000000000) { // 0.01 ETH
+        if (wethAllowance < amountInWei) {
             IERC20(wethAddress).approve(swapRouterAddress, type(uint256).max);
             console.log("WETH approval set");
         } else {
@@ -56,7 +73,7 @@ contract UseOperation is Script {
                 fee: 3000,
                 recipient: user,
                 deadline: block.timestamp + 7200,
-                amountIn: 10000000000000000, // 0.01 ETH
+                amountIn: amountInWei,
                 amountOutMinimum: 0,
                 sqrtPriceLimitX96: 0
             })
@@ -93,7 +110,7 @@ contract UseOperation is Script {
     }
     
     // 用户操作：反向交换 (PQUSD -> WETH)
-    function swapTokensReverse() public {
+    function swapTokensReverse(uint256 amountInEth) public {
         address user = vm.addr(vm.envUint("PRIVATE_KEY"));
         
         // 从环境变量读取合约地址
@@ -103,7 +120,14 @@ contract UseOperation is Script {
         
         ISwapRouter swapRouter = ISwapRouter(swapRouterAddress);
         
+        // 将 ETH 转换为 wei (注意：这里 amountInEth 实际上是以 ETH 为单位的 PQUSD 数量)
+        uint256 amountInWei = amountInEth * 10**18;
+        
         console.log("=== User Reverse Token Swap Operation ===");
+        console.log("Amount to swap (PQUSD tokens):");
+        console.logUint(amountInEth);
+        console.log("Amount to swap (wei):");
+        console.logUint(amountInWei);
         
         // 检查用户余额
         uint256 wethBalance = IERC20(wethAddress).balanceOf(user);
@@ -115,6 +139,16 @@ contract UseOperation is Script {
         console.log("PQUSD:");
         console.logUint(pqusdBalance);
         
+        // 检查 PQUSD 余额是否足够
+        if (pqusdBalance < amountInWei) {
+            console.log("Error: Insufficient PQUSD balance");
+            console.log("Required:");
+            console.logUint(amountInWei);
+            console.log("Available:");
+            console.logUint(pqusdBalance);
+            return;
+        }
+        
         // 开始广播交易
         vm.startBroadcast(user);
         
@@ -122,7 +156,7 @@ contract UseOperation is Script {
         uint256 pqusdAllowance = IERC20(pqusdAddress).allowance(user, swapRouterAddress);
         console.log("PQUSD allowance:");
         console.logUint(pqusdAllowance);
-        if (pqusdAllowance < 100000000000000000000) { // 100 tokens
+        if (pqusdAllowance < amountInWei) {
             IERC20(pqusdAddress).approve(swapRouterAddress, type(uint256).max);
             console.log("PQUSD approval set");
         } else {
@@ -137,7 +171,7 @@ contract UseOperation is Script {
                 fee: 3000,
                 recipient: user,
                 deadline: block.timestamp + 7200,
-                amountIn: 50000000000000000000, // 50 tokens
+                amountIn: amountInWei,
                 amountOutMinimum: 0,
                 sqrtPriceLimitX96: 0
             })
@@ -173,7 +207,6 @@ contract UseOperation is Script {
         console.logUint(pqusdDifference / 10**18);
     }
     
-
     
     // 用户操作：查询余额
     function checkUserBalance() public {
@@ -373,6 +406,7 @@ contract UseOperation is Script {
     function run() public {
         console.log("=== User Operation Script ===");
         console.log("Executing user token swap operation...");
-        swapTokens();
+        // 默认交换 1 ETH
+        swapTokens(1);
     }
 } 

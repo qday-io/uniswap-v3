@@ -78,7 +78,7 @@ contract DeployQuoterV2 is Script {
     }
     
     // 测试 QuoterV2 功能
-    function testQuoterV2() public {
+    function testQuoterV2(uint256 amountIn) public {
         address quoterV2Address = vm.envAddress("QUOTER_V2_ADDRESS");
         address wethAddress = vm.envAddress("WETH_ADDRESS");
         address testTokenAddress = vm.envAddress("PQUSD_ADDRESS");
@@ -92,14 +92,17 @@ contract DeployQuoterV2 is Script {
         
         console.log("=== Test QuoterV2 ===");
         console.log("Testing quote for WETH -> PQUSD swap");
-        console.log("Amount in: 1 ETH (1000000000000000000 wei)");
+        console.log("Amount in:", amountIn);
         console.log("Fee tier: 3000 (0.3%)");
-        
+
+        uint256 amountIn2= amountIn * 10**18;
+        console.log("Amount in (wei):", amountIn2);
+
         try quoterV2.quoteExactInputSingle(
             IQuoterV2.QuoteExactInputSingleParams({
                 tokenIn: wethAddress,
                 tokenOut: testTokenAddress,
-                amountIn: 1000000000000000000, // 1 ETH
+                amountIn: amountIn2, // 1 ETH
                 fee: 3000,
                 sqrtPriceLimitX96: 0
             })
@@ -130,3 +133,4 @@ contract DeployQuoterV2 is Script {
         }
     }
 } 
+ 
