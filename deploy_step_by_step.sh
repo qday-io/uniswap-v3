@@ -161,9 +161,13 @@ if [ -f "$SWAP_ROUTER_ARGS_FILE" ]; then
     # 更新工厂地址
     sed -i '' "1s/0x[a-fA-F0-9]\{40\}/$FACTORY_ADDRESS/" "$SWAP_ROUTER_ARGS_FILE"
     
+    # 更新 WETH9 地址
+    sed -i '' "2s/0x[a-fA-F0-9]\{40\}/$WETH_ADDRESS/" "$SWAP_ROUTER_ARGS_FILE"
+    
     log_success "SwapRouter 构造函数参数更新成功"
     echo "  文件: $SWAP_ROUTER_ARGS_FILE"
     echo "  新的工厂地址: $FACTORY_ADDRESS"
+    echo "  新的 WETH9 地址: $WETH_ADDRESS"
 else
     log_error "找不到 SwapRouter.txt 文件"
     exit 1
@@ -216,6 +220,19 @@ echo ""
 
 # 步骤 7: 部署 NonfungibleTokenPositionDescriptorFoundry
 log_info "步骤 7: 部署 NonfungibleTokenPositionDescriptorFoundry"
+NFT_POSITION_DESCRIPTOR_ARGS_FILE="src/deployConstructor/NonfungibleTokenPositionDescriptor.txt"
+if [ -f "$NFT_POSITION_DESCRIPTOR_ARGS_FILE" ]; then
+    # 备份原文件
+    cp "$NFT_POSITION_DESCRIPTOR_ARGS_FILE" "${NFT_POSITION_DESCRIPTOR_ARGS_FILE}.backup"
+    
+    # 更新 WETH9 地址
+    sed -i '' "1s/0x[a-fA-F0-9]\{40\}/$WETH_ADDRESS/" "$NFT_POSITION_DESCRIPTOR_ARGS_FILE"
+    
+    log_success "NonfungibleTokenPositionDescriptor 构造函数参数更新成功"
+    echo "  文件: $NFT_POSITION_DESCRIPTOR_ARGS_FILE"
+    echo "  新的 WETH9 地址: $WETH_ADDRESS"
+fi
+
 NFT_POSITION_DESCRIPTOR_OUTPUT=$(forge create src/NonfungibleTokenPositionDescriptorFoundry.sol:NonfungibleTokenPositionDescriptorFoundry \
   --constructor-args-path src/deployConstructor/NonfungibleTokenPositionDescriptor.txt \
   --private-key $PRIVATE_KEY \
@@ -246,11 +263,13 @@ if [ -f "$NFT_POSITION_MANAGER_ARGS_FILE" ]; then
     
     # 更新工厂地址和描述符地址
     sed -i '' "1s/0x[a-fA-F0-9]\{40\}/$FACTORY_ADDRESS/" "$NFT_POSITION_MANAGER_ARGS_FILE"
+    sed -i '' "2s/0x[a-fA-F0-9]\{40\}/$WETH_ADDRESS/" "$NFT_POSITION_MANAGER_ARGS_FILE"
     sed -i '' "3s/0x[a-fA-F0-9]\{40\}/$NFT_POSITION_DESCRIPTOR_ADDRESS/" "$NFT_POSITION_MANAGER_ARGS_FILE"
     
     log_success "NonfungiblePositionManager 构造函数参数更新成功"
     echo "  文件: $NFT_POSITION_MANAGER_ARGS_FILE"
     echo "  新的工厂地址: $FACTORY_ADDRESS"
+    echo "  新的 WETH9 地址: $WETH_ADDRESS"
     echo "  新的描述符地址: $NFT_POSITION_DESCRIPTOR_ADDRESS"
 else
     log_error "找不到 NonfungiblePositionManager.txt 文件"

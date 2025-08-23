@@ -47,7 +47,7 @@ contract LiquidityManagement is Script {
         // 检查池是否已初始化
         (uint160 sqrtPriceX96,,,,,,) = pool.slot0();
         if (sqrtPriceX96 == 0) {
-            pool.initialize(1000000000000000000000000); // 1e24
+            pool.initialize(2505414483750479311864138015696); // 1e24
         }
         
         // 执行流动性管理操作
@@ -110,8 +110,8 @@ contract LiquidityManagement is Script {
                 fee: 3000,
                 tickLower: -887220,
                 tickUpper: 887220,
-                amount0Desired: 10000000000000000000, // 10 ETH
-                amount1Desired: 1000000000000000000000, // 1000 tokens
+                amount0Desired: 1000000000000000000, // 1 ETH
+                amount1Desired: 2000000000000000000000, // 2000 tokens
                 amount0Min: 0,
                 amount1Min: 0,
                 recipient: deployer,
@@ -405,7 +405,7 @@ contract LiquidityManagement is Script {
         // 检查池是否已初始化
         (uint160 sqrtPriceX96,,,,,,) = pool.slot0();
         if (sqrtPriceX96 == 0) {
-            pool.initialize(1000000000000000000000000); // 1e24
+            pool.initialize(2505414483750479311864138015696); // 1e24
         }
         
         // 添加流动性
