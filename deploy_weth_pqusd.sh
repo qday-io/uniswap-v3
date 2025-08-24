@@ -214,8 +214,14 @@ if [ -f "$NFT_POSITION_MANAGER_FILE" ]; then
     # 备份原文件
     cp "$NFT_POSITION_MANAGER_FILE" "${NFT_POSITION_MANAGER_FILE}.backup"
     
-    # 更新 WETH 地址（第2行）
-    sed -i '' "2s/0x[a-fA-F0-9]\{40\}/$WETH_ADDRESS/" "$NFT_POSITION_MANAGER_FILE"
+    # 更新 WETH 地址（第2行）(跨平台兼容)
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS
+        sed -i '' "2s/0x[a-fA-F0-9]\{40\}/$WETH_ADDRESS/" "$NFT_POSITION_MANAGER_FILE"
+    else
+        # Linux
+        sed -i "2s/0x[a-fA-F0-9]\{40\}/$WETH_ADDRESS/" "$NFT_POSITION_MANAGER_FILE"
+    fi
     
     log_success "NonfungiblePositionManager.txt 更新成功"
     echo "  文件: $NFT_POSITION_MANAGER_FILE"

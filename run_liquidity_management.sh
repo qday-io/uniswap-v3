@@ -100,7 +100,13 @@ run_liquidity_management() {
                     if [ -f ".env" ]; then
                         # If CREATED_TOKEN_ID already exists, update it; otherwise add it
                         if grep -q "CREATED_TOKEN_ID" .env; then
-                            sed -i '' "s/CREATED_TOKEN_ID=.*/CREATED_TOKEN_ID=$TOKEN_ID/" .env
+                            if [[ "$OSTYPE" == "darwin"* ]]; then
+                                # macOS
+                                sed -i '' "s/CREATED_TOKEN_ID=.*/CREATED_TOKEN_ID=$TOKEN_ID/" .env
+                            else
+                                # Linux
+                                sed -i "s/CREATED_TOKEN_ID=.*/CREATED_TOKEN_ID=$TOKEN_ID/" .env
+                            fi
                             echo "✅ Updated CREATED_TOKEN_ID in .env file"
                         else
                             echo "CREATED_TOKEN_ID=$TOKEN_ID" >> .env

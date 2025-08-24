@@ -138,8 +138,14 @@ if [ -f "$POOL_ADDRESS_FILE" ]; then
     # 备份原文件
     cp "$POOL_ADDRESS_FILE" "${POOL_ADDRESS_FILE}.backup"
     
-    # 更新 POOL_INIT_CODE_HASH
-    sed -i '' "s/0x[a-fA-F0-9]\{64\}/$POOL_INIT_CODE_HASH/g" "$POOL_ADDRESS_FILE"
+    # 更新 POOL_INIT_CODE_HASH (跨平台兼容)
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS
+        sed -i '' "s/0x[a-fA-F0-9]\{64\}/$POOL_INIT_CODE_HASH/g" "$POOL_ADDRESS_FILE"
+    else
+        # Linux
+        sed -i "s/0x[a-fA-F0-9]\{64\}/$POOL_INIT_CODE_HASH/g" "$POOL_ADDRESS_FILE"
+    fi
     
     log_success "PoolAddress.sol 更新成功"
     echo "  文件: $POOL_ADDRESS_FILE"
@@ -158,11 +164,16 @@ if [ -f "$SWAP_ROUTER_ARGS_FILE" ]; then
     # 备份原文件
     cp "$SWAP_ROUTER_ARGS_FILE" "${SWAP_ROUTER_ARGS_FILE}.backup"
     
-    # 更新工厂地址
-    sed -i '' "1s/0x[a-fA-F0-9]\{40\}/$FACTORY_ADDRESS/" "$SWAP_ROUTER_ARGS_FILE"
-    
-    # 更新 WETH9 地址
-    sed -i '' "2s/0x[a-fA-F0-9]\{40\}/$WETH_ADDRESS/" "$SWAP_ROUTER_ARGS_FILE"
+    # 更新工厂地址 (跨平台兼容)
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS
+        sed -i '' "1s/0x[a-fA-F0-9]\{40\}/$FACTORY_ADDRESS/" "$SWAP_ROUTER_ARGS_FILE"
+        sed -i '' "2s/0x[a-fA-F0-9]\{40\}/$WETH_ADDRESS/" "$SWAP_ROUTER_ARGS_FILE"
+    else
+        # Linux
+        sed -i "1s/0x[a-fA-F0-9]\{40\}/$FACTORY_ADDRESS/" "$SWAP_ROUTER_ARGS_FILE"
+        sed -i "2s/0x[a-fA-F0-9]\{40\}/$WETH_ADDRESS/" "$SWAP_ROUTER_ARGS_FILE"
+    fi
     
     log_success "SwapRouter 构造函数参数更新成功"
     echo "  文件: $SWAP_ROUTER_ARGS_FILE"
@@ -225,8 +236,14 @@ if [ -f "$NFT_POSITION_DESCRIPTOR_ARGS_FILE" ]; then
     # 备份原文件
     cp "$NFT_POSITION_DESCRIPTOR_ARGS_FILE" "${NFT_POSITION_DESCRIPTOR_ARGS_FILE}.backup"
     
-    # 更新 WETH9 地址
-    sed -i '' "1s/0x[a-fA-F0-9]\{40\}/$WETH_ADDRESS/" "$NFT_POSITION_DESCRIPTOR_ARGS_FILE"
+    # 更新 WETH9 地址 (跨平台兼容)
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS
+        sed -i '' "1s/0x[a-fA-F0-9]\{40\}/$WETH_ADDRESS/" "$NFT_POSITION_DESCRIPTOR_ARGS_FILE"
+    else
+        # Linux
+        sed -i "1s/0x[a-fA-F0-9]\{40\}/$WETH_ADDRESS/" "$NFT_POSITION_DESCRIPTOR_ARGS_FILE"
+    fi
     
     log_success "NonfungibleTokenPositionDescriptor 构造函数参数更新成功"
     echo "  文件: $NFT_POSITION_DESCRIPTOR_ARGS_FILE"
@@ -261,10 +278,18 @@ if [ -f "$NFT_POSITION_MANAGER_ARGS_FILE" ]; then
     # 备份原文件
     cp "$NFT_POSITION_MANAGER_ARGS_FILE" "${NFT_POSITION_MANAGER_ARGS_FILE}.backup"
     
-    # 更新工厂地址和描述符地址
-    sed -i '' "1s/0x[a-fA-F0-9]\{40\}/$FACTORY_ADDRESS/" "$NFT_POSITION_MANAGER_ARGS_FILE"
-    sed -i '' "2s/0x[a-fA-F0-9]\{40\}/$WETH_ADDRESS/" "$NFT_POSITION_MANAGER_ARGS_FILE"
-    sed -i '' "3s/0x[a-fA-F0-9]\{40\}/$NFT_POSITION_DESCRIPTOR_ADDRESS/" "$NFT_POSITION_MANAGER_ARGS_FILE"
+    # 更新工厂地址和描述符地址 (跨平台兼容)
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS
+        sed -i '' "1s/0x[a-fA-F0-9]\{40\}/$FACTORY_ADDRESS/" "$NFT_POSITION_MANAGER_ARGS_FILE"
+        sed -i '' "2s/0x[a-fA-F0-9]\{40\}/$WETH_ADDRESS/" "$NFT_POSITION_MANAGER_ARGS_FILE"
+        sed -i '' "3s/0x[a-fA-F0-9]\{40\}/$NFT_POSITION_DESCRIPTOR_ADDRESS/" "$NFT_POSITION_MANAGER_ARGS_FILE"
+    else
+        # Linux
+        sed -i "1s/0x[a-fA-F0-9]\{40\}/$FACTORY_ADDRESS/" "$NFT_POSITION_MANAGER_ARGS_FILE"
+        sed -i "2s/0x[a-fA-F0-9]\{40\}/$WETH_ADDRESS/" "$NFT_POSITION_MANAGER_ARGS_FILE"
+        sed -i "3s/0x[a-fA-F0-9]\{40\}/$NFT_POSITION_DESCRIPTOR_ADDRESS/" "$NFT_POSITION_MANAGER_ARGS_FILE"
+    fi
     
     log_success "NonfungiblePositionManager 构造函数参数更新成功"
     echo "  文件: $NFT_POSITION_MANAGER_ARGS_FILE"
@@ -306,21 +331,39 @@ if [ -f ".env" ]; then
     # 备份原文件
     cp ".env" ".env.backup"
     
-    # 更新或添加合约地址
+    # 更新或添加合约地址 (跨平台兼容)
     if grep -q "FACTORY_ADDRESS" .env; then
-        sed -i '' "s/FACTORY_ADDRESS=.*/FACTORY_ADDRESS=$FACTORY_ADDRESS/" .env
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS
+            sed -i '' "s/FACTORY_ADDRESS=.*/FACTORY_ADDRESS=$FACTORY_ADDRESS/" .env
+        else
+            # Linux
+            sed -i "s/FACTORY_ADDRESS=.*/FACTORY_ADDRESS=$FACTORY_ADDRESS/" .env
+        fi
     else
         echo "FACTORY_ADDRESS=$FACTORY_ADDRESS" >> .env
     fi
     
     if grep -q "SWAP_ROUTER_ADDRESS" .env; then
-        sed -i '' "s/SWAP_ROUTER_ADDRESS=.*/SWAP_ROUTER_ADDRESS=$SWAP_ROUTER_ADDRESS/" .env
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS
+            sed -i '' "s/SWAP_ROUTER_ADDRESS=.*/SWAP_ROUTER_ADDRESS=$SWAP_ROUTER_ADDRESS/" .env
+        else
+            # Linux
+            sed -i "s/SWAP_ROUTER_ADDRESS=.*/SWAP_ROUTER_ADDRESS=$SWAP_ROUTER_ADDRESS/" .env
+        fi
     else
         echo "SWAP_ROUTER_ADDRESS=$SWAP_ROUTER_ADDRESS" >> .env
     fi
     
     if grep -q "POSITION_MANAGER_ADDRESS" .env; then
-        sed -i '' "s/POSITION_MANAGER_ADDRESS=.*/POSITION_MANAGER_ADDRESS=$NFT_POSITION_MANAGER_ADDRESS/" .env
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS
+            sed -i '' "s/POSITION_MANAGER_ADDRESS=.*/POSITION_MANAGER_ADDRESS=$NFT_POSITION_MANAGER_ADDRESS/" .env
+        else
+            # Linux
+            sed -i "s/POSITION_MANAGER_ADDRESS=.*/POSITION_MANAGER_ADDRESS=$NFT_POSITION_MANAGER_ADDRESS/" .env
+        fi
     else
         echo "POSITION_MANAGER_ADDRESS=$NFT_POSITION_MANAGER_ADDRESS" >> .env
     fi

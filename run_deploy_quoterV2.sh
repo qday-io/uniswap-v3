@@ -130,10 +130,16 @@ update_env_file() {
         # Backup original file
         cp ".env" ".env.backup.$(date +%Y%m%d_%H%M%S)"
         
-        # Update or add QUOTER_V2_ADDRESS
+        # Update or add QUOTER_V2_ADDRESS (Linux compatible)
         if grep -q "QUOTER_V2_ADDRESS" .env; then
             # Update existing QUOTER_V2_ADDRESS
-            sed -i '' "s/QUOTER_V2_ADDRESS=.*/QUOTER_V2_ADDRESS=$quoter_v2_address/" .env
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+                # macOS
+                sed -i '' "s/QUOTER_V2_ADDRESS=.*/QUOTER_V2_ADDRESS=$quoter_v2_address/" .env
+            else
+                # Linux
+                sed -i "s/QUOTER_V2_ADDRESS=.*/QUOTER_V2_ADDRESS=$quoter_v2_address/" .env
+            fi
             echo "Updated QUOTER_V2_ADDRESS in .env file"
         else
             # Add new QUOTER_V2_ADDRESS
