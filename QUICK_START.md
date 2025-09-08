@@ -78,6 +78,19 @@ anvil
 ./run_deploy_quoterV2.sh test
 ```
 
+### 8. Collect Configuration and ABIs
+
+```bash
+# Collect all contract ABIs and generate configuration files
+./collect_config.sh
+```
+
+This will:
+- Extract all contract ABIs to `config/` directory
+- Generate chain-specific configuration file (`config/config-{chain_id}.md`)
+- Create ABI usage documentation
+- Display deployment summary
+
 ## 📋 Deployment Results
 
 After deployment, you will see:
@@ -352,6 +365,9 @@ cp src/deployConstructor/NonfungiblePositionManager.txt.backup src/deployConstru
 
 # Redeploy QuoterV2
 ./run_deploy_quoterV2.sh deploy
+
+# Collect updated configuration and ABIs
+./collect_config.sh
 ```
 
 ## 🧪 Test Features
@@ -378,6 +394,9 @@ After deployment, you can test various features:
 
 # Test WETH deposit
 ./run_weth_deposit.sh
+
+# Collect configuration and ABIs
+./collect_config.sh
 ```
 
 ## 📡 Advanced Features
@@ -405,6 +424,18 @@ After deployment, you can test various features:
 # Custom liquidity amounts
 ./run_liquidity_management.sh increase 50 500   # 50 ETH, 500 tokens
 ./run_liquidity_management.sh increase 200 2000 # 200 ETH, 2000 tokens
+```
+
+### Configuration Collection
+```bash
+# Collect all contract ABIs and generate configuration files
+./collect_config.sh
+
+# View generated configuration
+cat config/config-{chain_id}.md
+
+# View ABI files
+ls -la config/*.json
 ```
 
 ## 📚 More Information

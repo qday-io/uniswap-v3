@@ -85,6 +85,11 @@ uniswapV3_foundry_deployment/
 ├── run_weth_deposit.sh          # WETH deposit script
 ├── run_event_monitor.sh          # Event monitoring script
 ├── run_realtime_monitor.sh       # Real-time event monitoring script
+├── collect_config.sh             # Configuration and ABI collection script
+├── config/                       # Configuration directory
+│   ├── config-{chain_id}.md      # Chain-specific configuration files
+│   ├── *.json                    # Contract ABI files
+│   └── README.md                 # ABI usage documentation
 ├── QUICK_START.md               # Quick start guide
 └── foundry.toml                 # Foundry configuration
 ```
@@ -158,6 +163,13 @@ Support for other networks can be added by modifying addresses in the `.env` fil
 - Support for custom deposit amounts
 - Automatic balance checking
 
+### Configuration Collection (`collect_config.sh`)
+- Collect all contract ABIs to `config/` directory
+- Generate chain-specific configuration files (`config/config-{chain_id}.md`)
+- Extract deployment information from `.env` file
+- Create ABI index and usage documentation
+- Automatically detect network type and deployment status
+
 ## 🧪 Testing Features
 
 After deployment, you can test various features:
@@ -182,6 +194,9 @@ After deployment, you can test various features:
 
 # Test WETH deposit
 ./run_weth_deposit.sh
+
+# Collect configuration and ABIs
+./collect_config.sh
 ```
 
 ## 📡 Event Monitoring
