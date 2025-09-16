@@ -401,20 +401,6 @@ After deployment, you can test various features:
 
 ## 📡 Advanced Features
 
-### Event Monitoring
-```bash
-# Monitor all events
-./run_event_monitor.sh all-events
-
-# Real-time monitoring
-./run_realtime_monitor.sh all-follow
-
-# Monitor specific contract events
-./run_event_monitor.sh pool-events <pool_address>
-./run_event_monitor.sh factory-events <factory_address>
-./run_event_monitor.sh position-events <position_manager_address>
-```
-
 ### Custom Operations
 ```bash
 # Custom swap amounts
