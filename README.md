@@ -83,8 +83,6 @@ uniswapV3_foundry_deployment/
 ├── run_liquidity_management.sh   # Liquidity management script
 ├── run_user_operation.sh         # User operation script
 ├── run_weth_deposit.sh          # WETH deposit script
-├── run_event_monitor.sh          # Event monitoring script
-├── run_realtime_monitor.sh       # Real-time event monitoring script
 ├── collect_config.sh             # Configuration and ABI collection script
 ├── config/                       # Configuration directory
 │   ├── config-{chain_id}.md      # Chain-specific configuration files
@@ -198,64 +196,6 @@ After deployment, you can test various features:
 # Collect configuration and ABIs
 ./collect_config.sh
 ```
-
-## 📡 Event Monitoring
-
-The project provides comprehensive event monitoring and decoding functionality:
-
-### Basic Event Monitoring (`run_event_monitor.sh`)
-```bash
-# Monitor Pool events
-./run_event_monitor.sh pool-events [pool_address]
-
-# Monitor Factory events
-./run_event_monitor.sh factory-events [factory_address]
-
-# Monitor Position Manager events
-./run_event_monitor.sh position-events [position_manager_address]
-
-# Monitor Router events
-./run_event_monitor.sh router-events [router_address]
-
-# Monitor QuoterV2 events
-./run_event_monitor.sh quoter-events [quoter_address]
-
-# Monitor Token events
-./run_event_monitor.sh token-events [token_address]
-
-# Monitor all events
-./run_event_monitor.sh all-events
-
-# Decode specific events
-./run_event_monitor.sh decode-event [event_signature] [log_data]
-```
-
-### Real-time Event Monitoring (`run_realtime_monitor.sh`)
-```bash
-# Real-time Pool event monitoring
-./run_realtime_monitor.sh pool-follow [pool_address]
-
-# Real-time Factory event monitoring
-./run_realtime_monitor.sh factory-follow [factory_address]
-
-# Real-time Position Manager event monitoring
-./run_realtime_monitor.sh position-follow [position_manager_address]
-
-# Real-time monitoring of all events
-./run_realtime_monitor.sh all-follow
-
-# Decode log files
-./run_realtime_monitor.sh decode-logs events.log
-```
-
-### Supported Event Types
-- **Pool Events**: Initialize, Mint, Burn, Swap, Collect, Flash, IncreaseObservationCardinalityNext, SetFeeProtocol, CollectProtocol
-- **Factory Events**: PoolCreated, OwnerChanged, FeeAmountEnabled
-- **Position Manager Events**: IncreaseLiquidity, DecreaseLiquidity, Collect
-- **Router Events**: All swap and routing events
-- **QuoterV2 Events**: Quote events
-- **ERC20 Events**: Transfer, Approval
-- **ERC721 Events**: Transfer, Approval, ApprovalForAll
 
 ## 🔍 Verify Deployment
 
