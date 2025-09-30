@@ -2,6 +2,12 @@
 
 # 收集合约ABI和环境配置的脚本
 # 将合约ABI文件统一放入config/目录，并收集.env信息写入config/config-{chain_id}.md
+# 
+# 功能特性:
+# - 自动从RPC获取链ID（如果未配置CHAIN_ID）
+# - 支持多种主流网络识别
+# - 自动收集合约ABI文件
+# - 生成配置文件和环境摘要
 
 set -e
 
@@ -66,7 +72,7 @@ for i in "${!CONTRACT_VARS[@]}"; do
         else
             # 如果没有jq，直接复制文件
             cp "$source_path" "$target_path"
-            log_warning "⚠️  未找到jq，已复制完整文件 $target_name"
+            log_warning "⚠️  未找到jq已复制完整文件 $target_name"
         fi
     else
         log_error "❌ 未找到ABI文件: $source_path"
@@ -79,15 +85,32 @@ if [ -f "$PROJECT_ROOT/.env" ]; then
     export $(cat "$PROJECT_ROOT/.env" | grep -v '^#' | xargs)
     log_success ".env文件加载成功"
 else
-    log_warning "未找到.env文件，使用默认值"
+    log_warning "未找到.env文件使用默认值"
     # 设置默认值
     CHAIN_ID=${CHAIN_ID:-31337}
     RPC_URL=${RPC_URL:-"http://localhost:8545"}
 fi
 
 # 获取链ID
-CHAIN_ID=${CHAIN_ID:-31337}
-log_info "链ID: $CHAIN_ID"
+if [ -z "$CHAIN_ID" ]; then
+    log_info "未设置CHAIN_ID，尝试从RPC获取..."
+    if [ -n "$RPC_URL" ]; then
+        # 尝试从RPC获取链ID
+        log_info "正在连接RPC: $RPC_URL"
+        CHAIN_ID=$(cast chain-id --rpc-url "$RPC_URL" 2>/dev/null || echo "")
+        if [ -n "$CHAIN_ID" ] && [ "$CHAIN_ID" != "0" ]; then
+            log_success "从RPC获取到链ID: $CHAIN_ID"
+        else
+            log_warning "无法从RPC获取链ID (可能RPC不可用或网络问题)，使用默认值: 31337"
+            CHAIN_ID=31337
+        fi
+    else
+        log_warning "未设置RPC_URL，使用默认链ID: 31337"
+        CHAIN_ID=31337
+    fi
+else
+    log_info "使用配置的链ID: $CHAIN_ID"
+fi
 
 # 确定网络名称
 case $CHAIN_ID in
@@ -244,3 +267,8 @@ echo "💡 提示:"
 echo "  - 查看配置文件: cat $CONFIG_FILE"
 echo "  - 重新收集: ./collect_config.sh"
 echo "  - 检查ABI文件: ls -la $CONFIG_DIR/*.json"
+echo ""
+echo "🔧 链ID检测:"
+echo "  - 如果未设置CHAIN_ID脚本会自动从RPC获取"
+echo "  - 当前链ID: $CHAIN_ID"
+echo "  - 网络名称: $NETWORK_NAME"
