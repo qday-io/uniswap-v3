@@ -76,10 +76,21 @@ if [ -z "$RPC_URL" ]; then
     RPC_URL="http://localhost:8545"
 fi
 
+# 设置重新部署配置默认值
+if [ -z "$REDEPLOY_WETH" ]; then
+    REDEPLOY_WETH="false"
+fi
+
+if [ -z "$REDEPLOY_PQUSD" ]; then
+    REDEPLOY_PQUSD="false"
+fi
+
 # 显示环境信息
 log_info "环境信息:"
 echo "  RPC URL: $RPC_URL"
 echo "  部署者地址: $(cast wallet address --private-key $PRIVATE_KEY)"
+echo "  重新部署 WETH: $REDEPLOY_WETH"
+echo "  重新部署 PQUSD: $REDEPLOY_PQUSD"
 
 # 编译项目
 log_info "编译项目..."
@@ -94,43 +105,85 @@ fi
 echo ""
 
 # 步骤 1: 部署 WETH
-log_info "步骤 1: 部署 WETH 合约"
-WETH_OUTPUT=$(forge create src/WETH.sol:WETH9 \
-  --private-key $PRIVATE_KEY \
-  --rpc-url $RPC_URL \
-  --legacy \
-  --broadcast 2>&1)
+log_info "步骤 1: 检查 WETH 合约状态"
 
-if [ $? -eq 0 ]; then
-    # 从输出中提取 WETH 地址
-    WETH_ADDRESS=$(echo "$WETH_OUTPUT" | grep "Deployed to:" | awk '{print $3}')
-    log_success "WETH 部署成功"
-    echo "  WETH 地址: $WETH_ADDRESS"
+# 检查是否已存在 WETH 地址且不需要重新部署
+if [ -n "$WETH_ADDRESS" ] && [ "$REDEPLOY_WETH" = "false" ]; then
+    # 验证现有合约
+    WETH_CODE=$(cast code $WETH_ADDRESS --rpc-url $RPC_URL 2>/dev/null)
+    if [ "$WETH_CODE" != "0x" ] && [ -n "$WETH_CODE" ]; then
+        log_success "WETH 合约已存在且有效，跳过部署"
+        echo "  WETH 地址: $WETH_ADDRESS"
+    else
+        log_warning "WETH 地址存在但合约无效，将重新部署"
+        WETH_ADDRESS=""
+    fi
 else
-    log_error "WETH 部署失败"
-    echo "$WETH_OUTPUT"
-    exit 1
+    log_info "WETH 地址未设置或需要重新部署"
+    WETH_ADDRESS=""
+fi
+
+# 如果需要部署 WETH
+if [ -z "$WETH_ADDRESS" ]; then
+    log_info "部署 WETH 合约..."
+    WETH_OUTPUT=$(forge create src/WETH.sol:WETH9 \
+      --private-key $PRIVATE_KEY \
+      --rpc-url $RPC_URL \
+      --legacy \
+      --broadcast 2>&1)
+
+    if [ $? -eq 0 ]; then
+        # 从输出中提取 WETH 地址
+        WETH_ADDRESS=$(echo "$WETH_OUTPUT" | grep "Deployed to:" | awk '{print $3}')
+        log_success "WETH 部署成功"
+        echo "  WETH 地址: $WETH_ADDRESS"
+    else
+        log_error "WETH 部署失败"
+        echo "$WETH_OUTPUT"
+        exit 1
+    fi
 fi
 
 echo ""
 
 # 步骤 2: 部署 PQUSD
-log_info "步骤 2: 部署 PQUSD 合约"
-PQUSD_OUTPUT=$(forge create src/PQUSD.sol:PQUSD \
-  --private-key $PRIVATE_KEY \
-  --rpc-url $RPC_URL \
-  --legacy \
-  --broadcast 2>&1)
+log_info "步骤 2: 检查 PQUSD 合约状态"
 
-if [ $? -eq 0 ]; then
-    # 从输出中提取 PQUSD 地址
-    PQUSD_ADDRESS=$(echo "$PQUSD_OUTPUT" | grep "Deployed to:" | awk '{print $3}')
-    log_success "PQUSD 部署成功"
-    echo "  PQUSD 地址: $PQUSD_ADDRESS"
+# 检查是否已存在 PQUSD 地址且不需要重新部署
+if [ -n "$PQUSD_ADDRESS" ] && [ "$REDEPLOY_PQUSD" = "false" ]; then
+    # 验证现有合约
+    PQUSD_CODE=$(cast code $PQUSD_ADDRESS --rpc-url $RPC_URL 2>/dev/null)
+    if [ "$PQUSD_CODE" != "0x" ] && [ -n "$PQUSD_CODE" ]; then
+        log_success "PQUSD 合约已存在且有效，跳过部署"
+        echo "  PQUSD 地址: $PQUSD_ADDRESS"
+    else
+        log_warning "PQUSD 地址存在但合约无效，将重新部署"
+        PQUSD_ADDRESS=""
+    fi
 else
-    log_error "PQUSD 部署失败"
-    echo "$PQUSD_OUTPUT"
-    exit 1
+    log_info "PQUSD 地址未设置或需要重新部署"
+    PQUSD_ADDRESS=""
+fi
+
+# 如果需要部署 PQUSD
+if [ -z "$PQUSD_ADDRESS" ]; then
+    log_info "部署 PQUSD 合约..."
+    PQUSD_OUTPUT=$(forge create src/PQUSD.sol:PQUSD \
+      --private-key $PRIVATE_KEY \
+      --rpc-url $RPC_URL \
+      --legacy \
+      --broadcast 2>&1)
+
+    if [ $? -eq 0 ]; then
+        # 从输出中提取 PQUSD 地址
+        PQUSD_ADDRESS=$(echo "$PQUSD_OUTPUT" | grep "Deployed to:" | awk '{print $3}')
+        log_success "PQUSD 部署成功"
+        echo "  PQUSD 地址: $PQUSD_ADDRESS"
+    else
+        log_error "PQUSD 部署失败"
+        echo "$PQUSD_OUTPUT"
+        exit 1
+    fi
 fi
 
 echo ""
@@ -252,7 +305,12 @@ SWAP_ROUTER_ADDRESS=
 POSITION_MANAGER_ADDRESS=
 FACTORY_ADDRESS=
 QUOTER_V2_ADDRESS=
-CREATED_TOKEN_ID=1  
+CREATED_TOKEN_ID=1
+
+# 重新部署配置 (true/false)
+# 设置为 true 将重新部署对应的合约，即使已存在
+REDEPLOY_WETH=$REDEPLOY_WETH
+REDEPLOY_PQUSD=$REDEPLOY_PQUSD
 EOF
 
 log_success ".env 文件已更新"

@@ -3,7 +3,7 @@
 ## 网络信息
 - **链ID**: 44003
 - **RPC URL**: https://rpc-0.qday.info
-- **网络名称**: Local Anvil
+- **网络名称**: Unknown Network
 
 ## 合约地址
 
@@ -42,3 +42,5 @@ cast code $PQUSD_ADDRESS --rpc-url $RPC_URL
 ```
 
 ---
+*配置文件生成时间: Tue Sep 30 22:39:31 CST 2025*
+*链ID: 44003*
