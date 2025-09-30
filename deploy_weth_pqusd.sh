@@ -88,6 +88,7 @@ fi
 # 显示环境信息
 log_info "环境信息:"
 echo "  RPC URL: $RPC_URL"
+echo "  链ID: ${CHAIN_ID:-"未设置 (将从RPC自动获取)"}"
 echo "  部署者地址: $(cast wallet address --private-key $PRIVATE_KEY)"
 echo "  重新部署 WETH: $REDEPLOY_WETH"
 echo "  重新部署 PQUSD: $REDEPLOY_PQUSD"
@@ -286,6 +287,13 @@ fi
 # 更新 .env 文件
 log_info "更新 .env 文件..."
 
+# 保留现有的 CHAIN_ID 配置
+if [ -z "$CHAIN_ID" ]; then
+    CHAIN_ID_LINE=""
+else
+    CHAIN_ID_LINE="CHAIN_ID=$CHAIN_ID"
+fi
+
 # 创建或更新 .env 文件
 cat > .env << EOF
 # Uniswap V3 Foundry 部署环境变量
@@ -295,6 +303,9 @@ PRIVATE_KEY=$PRIVATE_KEY
 
 # RPC URL (可选，默认为本地 Anvil 节点)
 RPC_URL=$RPC_URL
+
+# 链ID (可选，如果未设置将从RPC自动获取)
+$CHAIN_ID_LINE
 
 # 合约地址
 WETH_ADDRESS=$WETH_ADDRESS
@@ -329,6 +340,7 @@ $(date)
 
 ## 环境信息
 - RPC URL: $RPC_URL
+- 链ID: ${CHAIN_ID:-"未设置"}
 - 部署者: $DEPLOYER_ADDRESS
 
 ## 合约信息
@@ -371,6 +383,7 @@ echo ""
 echo "📋 部署摘要:"
 echo "  WETH 地址: $WETH_ADDRESS"
 echo "  PQUSD 地址: $PQUSD_ADDRESS"
+echo "  链ID: ${CHAIN_ID:-"unknown"}"
 echo "  部署者: $DEPLOYER_ADDRESS"
 echo "  配置文件已更新"
 echo "  部署摘要: token_deployment_summary.md"
