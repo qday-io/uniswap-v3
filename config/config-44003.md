@@ -2,22 +2,22 @@
 
 ## 网络信息
 - **链ID**: 44003
-- **RPC URL**: https://rpc-0.qday.info
+- **RPC URL**: https://rpc.qday.info
 - **网络名称**: Unknown Network
 
 ## 合约地址
 
 | 合约名称 | 环境变量 | 地址 | 状态 |
 |---------|---------|------|------|
-| WETH | WETH_ADDRESS | 0x1e16f76d65A800812E459a4cc94ce829D3993F00 | ✅ 已部署 |
-| PQUSD | PQUSD_ADDRESS | 0x789100cAF4fF90b3a548FAb6C773Ab739D349B2a | ✅ 已部署 |
-| Swap Router | SWAP_ROUTER_ADDRESS | 0xB391D4B616aD29A9C31C20aFE75D108a2854B72f | ✅ 已部署 |
-| Position Manager | POSITION_MANAGER_ADDRESS | 0x91EfC4b4214A3EA4943CdfD132641a48c21D0F29 | ✅ 已部署 |
-| Factory | FACTORY_ADDRESS | 0x0a27E04E4A87dc730d77844a4D2eAd4e0FA62c6b | ✅ 已部署 |
-| Quoter V2 | QUOTER_V2_ADDRESS | 0xe79059C8DAc7EbB73A9a3EFbA1B2E6721e61e9ec | ✅ 已部署 |
+| WETH | WETH_ADDRESS | 0x31ff878190Cf74E37d963F77599abB674d27A787 | ✅ 已部署 |
+| PQUSD | PQUSD_ADDRESS | 未设置 | ❌ 未部署 |
+| Swap Router | SWAP_ROUTER_ADDRESS | 0x5deCEf80363C3494F38Ce7A694fe86833B9f674e | ✅ 已部署 |
+| Position Manager | POSITION_MANAGER_ADDRESS | 0x8C81594a06eF668Be8C043ccf2b68652c66A1d29 | ✅ 已部署 |
+| Factory | FACTORY_ADDRESS | 0x85146103E26142253622757Cb2b1604f76fAB2B2 | ✅ 已部署 |
+| Quoter V2 | QUOTER_V2_ADDRESS | 0x14e5eF0F7d3F46Dd850B199984C5F8D596D2465c | ✅ 已部署 |
 
 ## 部署信息
-- **部署者地址**: 0x932C857b5B2C4206a51FC47AE559829F787aa14c
+- **部署者地址**: 0x4E6559E2DB5f1907365629CCbe8Ab615101a943A
 - **创建代币ID**: 1
 
 ## 部署脚本
@@ -42,5 +42,5 @@ cast code $PQUSD_ADDRESS --rpc-url $RPC_URL
 ```
 
 ---
-*配置文件生成时间: Wed Oct  1 01:34:16 CST 2025*
+*配置文件生成时间: Mon Nov 24 17:10:43 CST 2025*
 *链ID: 44003*
