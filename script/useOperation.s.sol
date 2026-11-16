@@ -331,6 +331,191 @@ contract UseOperation is Script {
         console.logAddress(token1);
     }
     
+    // 用户操作：多跳交换（通过中间代币进行交换）
+    // @param amountInEth: 输入代币数量（以 ETH 为单位）
+    // @param tokens: 代币地址数组，例如 [WETH, USDC, PQUSD] 表示 WETH -> USDC -> PQUSD
+    // @param fees: 费用层级数组，例如 [3000, 3000] 表示每个池子的费用
+    function swapTokensMultiHop(
+        uint256 amountInEth,
+        address[] memory tokens,
+        uint24[] memory fees
+    ) public {
+        require(tokens.length >= 2, "At least 2 tokens required");
+        require(fees.length == tokens.length - 1, "Fees array length must be tokens.length - 1");
+        
+        address user = vm.addr(vm.envUint("PRIVATE_KEY"));
+        address payable swapRouterAddress = payable(vm.envAddress("SWAP_ROUTER_ADDRESS"));
+        ISwapRouter swapRouter = ISwapRouter(swapRouterAddress);
+        
+        // 将 ETH 转换为 wei
+        uint256 amountInWei = amountInEth * 10**18;
+        
+        console.log("=== Multi-Hop Token Swap Operation ===");
+        console.log("Amount to swap (ETH equivalent):");
+        console.logUint(amountInEth);
+        console.log("Amount to swap (wei):");
+        console.logUint(amountInWei);
+        
+        // 显示交换路径
+        console.log("=== Swap Path ===");
+        for (uint256 i = 0; i < tokens.length; i++) {
+            console.log("Token");
+            console.logUint(i);
+            console.log(":");
+            console.logAddress(tokens[i]);
+            if (i < fees.length) {
+                console.log("Fee tier:");
+                console.logUint(fees[i]);
+            }
+        }
+        
+        // 检查第一个代币的余额
+        address tokenIn = tokens[0];
+        address tokenOut = tokens[tokens.length - 1];
+        uint256 tokenInBalance = IERC20(tokenIn).balanceOf(user);
+        uint256 tokenOutBalance = IERC20(tokenOut).balanceOf(user);
+        
+        console.log("=== Balance Check ===");
+        console.log("Input token balance:");
+        console.logUint(tokenInBalance);
+        console.log("Output token balance (before):");
+        console.logUint(tokenOutBalance);
+        
+        if (tokenInBalance < amountInWei) {
+            console.log("Error: Insufficient token balance");
+            console.log("Required:");
+            console.logUint(amountInWei);
+            console.log("Available:");
+            console.logUint(tokenInBalance);
+            return;
+        }
+        
+        // 开始广播交易
+        vm.startBroadcast(user);
+        
+        // 确保有足够的授权
+        uint256 tokenInAllowance = IERC20(tokenIn).allowance(user, swapRouterAddress);
+        console.log("Input token allowance:");
+        console.logUint(tokenInAllowance);
+        if (tokenInAllowance < amountInWei) {
+            IERC20(tokenIn).approve(swapRouterAddress, type(uint256).max);
+            console.log("Token approval set");
+        } else {
+            console.log("Token already approved");
+        }
+        
+        // 构建多跳路径
+        bytes memory path;
+        for (uint256 i = 0; i < tokens.length; i++) {
+            if (i == tokens.length - 1) {
+                // 最后一个代币，只需要地址
+                path = abi.encodePacked(path, tokens[i]);
+            } else {
+                // 中间代币，需要地址和费用
+                path = abi.encodePacked(path, tokens[i], fees[i]);
+            }
+        }
+        
+        console.log("Path length (bytes):");
+        console.logUint(path.length);
+        
+        // 执行多跳交换
+        uint256 amountOut = swapRouter.exactInput(
+            ISwapRouter.ExactInputParams({
+                path: path,
+                recipient: user,
+                deadline: block.timestamp + 7200,
+                amountIn: amountInWei,
+                amountOutMinimum: 0
+            })
+        );
+        
+        // 停止广播
+        vm.stopBroadcast();
+        
+        console.log("Multi-hop swap successful");
+        console.log("Amount out (wei):");
+        console.logUint(amountOut);
+        console.log("Amount out (tokens):");
+        console.logUint(amountOut / 10**18);
+        
+        // 显示交换后余额
+        uint256 newTokenInBalance = IERC20(tokenIn).balanceOf(user);
+        uint256 newTokenOutBalance = IERC20(tokenOut).balanceOf(user);
+        
+        console.log("=== Balance After Swap ===");
+        console.log("Input token balance:");
+        console.logUint(newTokenInBalance);
+        console.log("Output token balance:");
+        console.logUint(newTokenOutBalance);
+        
+        // 计算并显示差额
+        uint256 tokenInDifference = tokenInBalance - newTokenInBalance;
+        uint256 tokenOutDifference = newTokenOutBalance - tokenOutBalance;
+        
+        console.log("=== Balance Changes ===");
+        console.log("Input token spent (wei):");
+        console.logUint(tokenInDifference);
+        console.log("Input token spent (tokens):");
+        console.logUint(tokenInDifference / 10**18);
+        console.log("Output token received (wei):");
+        console.logUint(tokenOutDifference);
+        console.log("Output token received (tokens):");
+        console.logUint(tokenOutDifference / 10**18);
+    }
+    
+    // 用户操作：多跳交换（便捷方法 - WETH -> 中间代币 -> PQUSD）
+    // @param amountInEth: 输入 WETH 数量（以 ETH 为单位）
+    // @param intermediateToken: 中间代币地址
+    // @param fee1: 第一个池子的费用（WETH -> 中间代币）
+    // @param fee2: 第二个池子的费用（中间代币 -> PQUSD）
+    function swapTokensMultiHopWethToPqusd(
+        uint256 amountInEth,
+        address intermediateToken,
+        uint24 fee1,
+        uint24 fee2
+    ) public {
+        address payable wethAddress = payable(vm.envAddress("WETH_ADDRESS"));
+        address payable pqusdAddress = payable(vm.envAddress("PQUSD_ADDRESS"));
+        
+        address[] memory tokens = new address[](3);
+        tokens[0] = wethAddress;
+        tokens[1] = intermediateToken;
+        tokens[2] = pqusdAddress;
+        
+        uint24[] memory fees = new uint24[](2);
+        fees[0] = fee1;
+        fees[1] = fee2;
+        
+        swapTokensMultiHop(amountInEth, tokens, fees);
+    }
+    
+    // 用户操作：多跳交换（便捷方法 - PQUSD -> 中间代币 -> WETH）
+    // @param amountInEth: 输入 PQUSD 数量（以 ETH 为单位，即代币数量）
+    // @param intermediateToken: 中间代币地址
+    // @param fee1: 第一个池子的费用（PQUSD -> 中间代币）
+    // @param fee2: 第二个池子的费用（中间代币 -> WETH）
+    function swapTokensMultiHopPqusdToWeth(
+        uint256 amountInEth,
+        address intermediateToken,
+        uint24 fee1,
+        uint24 fee2
+    ) public {
+        address payable wethAddress = payable(vm.envAddress("WETH_ADDRESS"));
+        address payable pqusdAddress = payable(vm.envAddress("PQUSD_ADDRESS"));
+        
+        address[] memory tokens = new address[](3);
+        tokens[0] = pqusdAddress;
+        tokens[1] = intermediateToken;
+        tokens[2] = wethAddress;
+        
+        uint24[] memory fees = new uint24[](2);
+        fees[0] = fee1;
+        fees[1] = fee2;
+        
+        swapTokensMultiHop(amountInEth, tokens, fees);
+    }
+    
     // 用户操作：查询流动性状态
     function checkLiquidityStatus() public {
         address user = vm.addr(vm.envUint("PRIVATE_KEY"));
