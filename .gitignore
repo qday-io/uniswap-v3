@@ -1,6 +1,7 @@
 # Compiler files
 cache/
 out/
+src/deployConstructor/
 
 # Ignores development broadcast logs
 !/broadcast
